@@ -84,9 +84,9 @@
   gap: 8px;
   padding: 8px 10px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.16); /* increased opacity */
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.92);
   font-size: 0.9rem;
   white-space: nowrap;
   backdrop-filter: blur(10px);
@@ -141,16 +141,18 @@
 
 .ha-video {
   object-fit: cover;
-  transform: translate3d(0, 0, 0);
+  /* Mirror the camera preview like a mirror */
+  transform: translate3d(0, 0, 0) scaleX(-1);
   will-change: transform;
 }
 
 /* Blend canvas gently on top */
 .ha-canvas {
   pointer-events: none;
-  opacity: 0.96;
+  opacity: 0.98;
   mix-blend-mode: screen;
   border-radius: 0;
+  /* Keep canvas rendered normally; drawing code flips landmarks via the canvas context */
   transform: translate3d(0, 0, 0);
   will-change: transform;
 }
@@ -210,7 +212,7 @@
   border-radius: 14px;
 
   /* MORE OPAQUE */
-  background: rgba(0, 0, 0, 0.72);
+  background: rgba(0, 0, 0, 0.82);
   border: 1px solid rgba(255, 255, 255, 0.22);
 
   color: rgba(255, 255, 255, 0.92);
@@ -361,8 +363,8 @@
 .ha-detail {
   margin-top: 14px;
   border-radius: 18px;
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.42); /* more opaque */
+  border: 1px solid rgba(255, 255, 255, 0.12);
   padding: 14px;
 }
 

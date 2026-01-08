@@ -60,10 +60,10 @@ REQUIRED_CHALLENGES = 3  # Number of successful challenges required for authenti
 CHALLENGE_DELAY_SEC = 1.0  # Delay between challenges
 
 # Practical tuning (makes the system usable in normal webcam conditions)
-AUTH_THRESHOLD = 0.60          # overall confidence required for authentication
+AUTH_THRESHOLD = 0.55          # overall confidence required for authentication (lowered slightly)
 PASSIVE_ONLY_THRESHOLD = 0.62  # allow-passive threshold when challenges haven't completed
 AUTH_HOLD_SEC = 2.0            # keep auth "latched" briefly to avoid flicker
-MIN_FRAMES_BEFORE_CHALLENGES = 15  # minimum frames before challenges are issued
+MIN_FRAMES_BEFORE_CHALLENGES = 8  # minimum frames before challenges are issued (reduced)
 
 # Thresholds for detection methods
 MICRO_MOVEMENT_PASS_THRESHOLD = 0.5  # Threshold for passing micro-movement detection
@@ -135,7 +135,7 @@ class HumanAuth:
         """
         self.face_model_path = face_model_path or self._find_face_model()
         self.hand_model_path = hand_model_path or self._find_hand_model()
-        
+
         # Initialize MediaPipe face landmarker with iris tracking
         base_options = mp_tasks_python.BaseOptions(model_asset_path=self.face_model_path)
         options = mp_tasks_vision.FaceLandmarkerOptions(
@@ -192,14 +192,14 @@ class HumanAuth:
         self.current_hand_landmarks = None
         self.challenge_success_time = None
         
-        # Weights for different detection methods (adjusted to include hand detection)
+        # Weights for different detection methods (adjusted to favor challenge response and make confidence rise earlier)
         self.weights = {
-            "3d_consistency": 0.20,
-            "micro_movement": 0.10,
-            "blink_pattern": 0.15,
-            "challenge_response": 0.25,
+            "3d_consistency": 0.15,
+            "micro_movement": 0.08,
+            "blink_pattern": 0.12,
+            "challenge_response": 0.40,  # increased weight for active challenge responses
             "texture_analysis": 0.10,
-            "hand_detection": 0.20    # New weight for hand detection
+            "hand_detection": 0.15
         }
     
     def _find_face_model(self) -> str:
@@ -330,28 +330,29 @@ class HumanAuth:
         
         Returns a score between 0.0 and 1.0 indicating the presence of natural micro-movements.
         """
-        if len(self.face_history) < 10:
+        # Allow micro-movement scoring earlier (fewer frames required)
+        if len(self.face_history) < 4:
             return 0.0
-            
+
         # Calculate movement variance across recent frames
         movements = []
         for i in range(1, min(30, len(self.face_history))):
             prev_landmarks = self.face_history[-i-1][1]
             curr_landmarks = self.face_history[-i][1]
-            
+
             if not prev_landmarks or not curr_landmarks:
                 continue
-                
+
             # Sample a few landmarks to check for movement
             sample_indices = [4, 33, 263, 61, 291, 152]  # nose, eyes, mouth, chin
             movement = 0.0
             count = 0
-            
+
             for idx in sample_indices:
                 if idx < len(prev_landmarks) and idx < len(curr_landmarks):
                     prev_lm = prev_landmarks[idx]
                     curr_lm = curr_landmarks[idx]
-                    
+
                     # Calculate movement distance
                     dist = math.sqrt(
                         (prev_lm.x - curr_lm.x)**2 + 
@@ -360,17 +361,17 @@ class HumanAuth:
                     )
                     movement += dist
                     count += 1
-            
+
             if count > 0:
                 movements.append(movement / count)
-        
+
         if not movements:
             return 0.0
-            
+
         # Calculate statistics of movements
         mean_movement = np.mean(movements)
         std_movement = np.std(movements)
-        
+
         # Real faces have small but non-zero movements
         # Too little movement suggests a photo, too much might be erratic
         if mean_movement < MICRO_MOVEMENT_THRESHOLD:
@@ -380,7 +381,7 @@ class HumanAuth:
         else:
             # Ideal range: small movements with some variation
             movement_score = min(1.0, mean_movement / 0.01)
-            variation_score = min(1.0, std_movement / (mean_movement * 0.5))
+            variation_score = min(1.0, std_movement / (mean_movement * 0.5 + 1e-6))
             return (movement_score + variation_score) / 2.0
     
     def _check_3d_consistency(self) -> float:
@@ -389,15 +390,16 @@ class HumanAuth:
         
         Returns a score between 0.0 and 1.0 indicating 3D consistency.
         """
-        if len(self.depth_ratios_history) < 10:
+        # Allow 3D consistency scoring earlier (reduced history requirement)
+        if len(self.depth_ratios_history) < 4:
             return 0.0
-            
+
         # Calculate statistics of depth ratios
         ratios_array = np.array(self.depth_ratios_history)
-        
+
         if ratios_array.size == 0 or ratios_array.ndim < 2:
             return 0.0
-            
+
         # Calculate standard deviation for each ratio
         std_devs = np.std(ratios_array, axis=0)
         
@@ -434,9 +436,10 @@ class HumanAuth:
         
         Returns a score between 0.0 and 1.0.
         """
-        if len(self.blink_history) < 10:
+        # Allow blink-pattern scoring earlier
+        if len(self.blink_history) < 4:
             return 0.0
-            
+
         # Check blink rate
         if self.blink_rate < MIN_BLINKS_PER_MINUTE:
             # Too few blinks, suspicious
@@ -984,38 +987,41 @@ class HumanAuth:
         details["blink_pattern_score"] = blink_pattern_score
         details["challenge_response_score"] = challenge_response_score
         details["texture_score"] = texture_score
-        
-        # Calculate overall confidence
+
+        # Calculate overall confidence (tuned)
+        # Passive baseline: small initial confidence so the UI shows a value early
+        passive_base = 0.0
+        if details.get("face_detected"):
+            passive_base = 0.14
+        elif details.get("hand_detected"):
+            passive_base = 0.06
+
+        # Weighted sum of detector scores
         confidence = (
-            self.weights["micro_movement"] * micro_movement_score +
-            self.weights["3d_consistency"] * consistency_score +
-            self.weights["blink_pattern"] * blink_pattern_score +
-            self.weights["challenge_response"] * challenge_response_score +
-            self.weights["texture_analysis"] * texture_score +
-            self.weights["hand_detection"] * hand_detection_score
-        )
-        
-        # Update authentication state
-        self.auth_confidence = confidence
-        
-        # Authentication logic (usable + stable):
-        # - Always require REQUIRED_CHALLENGES (3) challenges for authentication
-        # - Brief hold time avoids flicker
-        #
-        # BUGFIX: Modified authentication logic to ensure all authentication attempts require 3 challenges.
-        # Previously, there were two paths that could bypass the challenge requirement:
-        # 1. High confidence path (confidence >= AUTH_THRESHOLD)
-        # 2. Early authentication path (confidence >= PASSIVE_ONLY_THRESHOLD) if not enough history
-        # These paths were causing subsequent authentication attempts (after restart) to only require 2 challenges.
-        # Now, all authentication attempts consistently require 3 challenges.
-        authenticated_now = (
-            self.successful_challenges_count >= REQUIRED_CHALLENGES and confidence >= (AUTH_THRESHOLD - 0.05)
+                self.weights["micro_movement"] * micro_movement_score +
+                self.weights["3d_consistency"] * consistency_score +
+                self.weights["blink_pattern"] * blink_pattern_score +
+                self.weights["challenge_response"] * challenge_response_score +
+                self.weights["texture_analysis"] * texture_score +
+                self.weights["hand_detection"] * hand_detection_score
         )
 
-        # Remove the early authentication path to ensure all authentication attempts require REQUIRED_CHALLENGES
-        # have_history = len(self.face_history) >= MIN_FRAMES_BEFORE_CHALLENGES
-        # if not authenticated_now and not have_history:
-        #     authenticated_now = confidence >= PASSIVE_ONLY_THRESHOLD
+        # Add passive baseline so frontend sees a non-zero interval early
+        confidence = min(1.0, confidence + passive_base)
+
+        # Stronger boost per completed challenge so the displayed confidence rises faster
+        boost_per_challenge = 0.18
+        confidence_boost = boost_per_challenge * min(self.successful_challenges_count, REQUIRED_CHALLENGES)
+        confidence = min(1.0, confidence + confidence_boost)
+
+        # Update authentication state
+        self.auth_confidence = confidence
+
+        # Authentication logic: if required challenges are completed, immediately authenticate
+        if self.successful_challenges_count >= REQUIRED_CHALLENGES:
+            authenticated_now = True
+        else:
+            authenticated_now = confidence >= AUTH_THRESHOLD
 
         # Latch auth briefly to avoid flicker
         if authenticated_now:
@@ -1521,3 +1527,4 @@ class HumanAuth:
             hand_color, 
             1
         )
+

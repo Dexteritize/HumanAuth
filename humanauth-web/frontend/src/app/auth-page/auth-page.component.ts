@@ -134,7 +134,19 @@ export class AuthPageComponent implements OnDestroy {
       // Draw visual indicators based on the result
       this.drawVisualIndicators(this.result);
     } catch (e: any) {
-      this.error = e.message;
+      // On any processing error, surface the message and stop the session.
+      // This ensures the system does not continue or auto-restart; user must press Start.
+      this.error = e?.message || String(e);
+      this.running = false;
+      // Clean up resources to leave a consistent stopped state
+      try { this.cam.stop(); } catch { /* noop */ }
+      try { this.auth.disconnect(); } catch { /* noop */ }
+      // Cancel any pending animation frame (defensive)
+      if (this.animationFrameId) {
+        cancelAnimationFrame(this.animationFrameId);
+        this.animationFrameId = undefined;
+      }
+      return;
     }
 
     // Schedule next frame using requestAnimationFrame for smoother rendering
@@ -145,45 +157,111 @@ export class AuthPageComponent implements OnDestroy {
     if (!result || !result.details) return;
 
     const canvas = this.canvas.nativeElement;
-    const ctx = canvas.getContext('2d', { alpha: false });
+    // Use an alpha-enabled context so we can draw overlays
+    const ctx = canvas.getContext('2d', { alpha: true });
     if (!ctx) return;
 
-    // Clear the canvas with a composite operation that's more efficient
-    ctx.globalCompositeOperation = 'copy';
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.0)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.globalCompositeOperation = 'source-over';
+    // Clear the canvas first
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw semi-transparent overlay for better visibility
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+    // Draw a darker, more opaque overlay to dim the video feed (normal orientation)
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.72)'; // slightly darker
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Draw face landmarks if available
+    // Draw landmarks using a flipped drawing transform so they align with the mirrored video
+    ctx.save();
+    ctx.setTransform(-1, 0, 0, 1, canvas.width, 0);
     if (result.details['face_landmarks']) {
       this.drawFaceLandmarks(ctx, result.details['face_landmarks']);
     }
-
-    // Draw hand landmarks if available
     if (result.details['hand_landmarks'] && result.details['hand_detected']) {
       this.drawHandLandmarks(ctx, result.details['hand_landmarks']);
     }
+    ctx.restore();
 
     // Draw authentication status
-    ctx.font = '20px Arial';
-    ctx.fillStyle = result.authenticated ? 'green' : 'red';
-    ctx.fillText(`Auth: ${result.authenticated ? 'Yes' : 'No'} (${Math.round(result.confidence * 100)}%)`, 10, 30);
+    // Render auth status on a small opaque pill background for readability (normal orientation)
+    ctx.font = '16px Arial';
+    const authText = `Auth: ${result.authenticated ? 'Yes' : 'No'} (${Math.round(result.confidence * 100)}%)`;
+    const padding = 10;
+    const textMetrics = ctx.measureText(authText);
+    const boxW = textMetrics.width + padding * 2;
+    const boxH = 28;
+    const boxX = 10;
+    const boxY = 8;
+
+    ctx.save();
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.85)'; // more opaque background
+    const r = 8;
+    ctx.beginPath();
+    ctx.moveTo(boxX + r, boxY);
+    ctx.arcTo(boxX + boxW, boxY, boxX + boxW, boxY + boxH, r);
+    ctx.arcTo(boxX + boxW, boxY + boxH, boxX, boxY + boxH, r);
+    ctx.arcTo(boxX, boxY + boxH, boxX, boxY, r);
+    ctx.arcTo(boxX, boxY, boxX + boxW, boxY, r);
+    ctx.closePath();
+    ctx.fill();
+    ctx.font = '16px Arial';
+    ctx.fillStyle = result.authenticated ? 'rgba(108,255,214,0.95)' : 'rgba(255,214,102,0.95)';
+    ctx.fillText(authText, boxX + padding, boxY + 19);
+    ctx.restore();
+
+    // Compute challenge progress values early so we can show authorised overlay
+    const completedChallenges = result.details['successful_challenges_count'] || 0;
+    const requiredChallenges = result.details['required_challenges'] || 3;
+
+    // If all challenges complete, show an authorized screen overlay and stop drawing other UI
+    if (completedChallenges >= requiredChallenges) {
+      // Draw a full-screen authorized message (normal orientation)
+      ctx.save();
+      ctx.fillStyle = 'rgba(0, 120, 0, 0.9)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Centered message
+      ctx.textAlign = 'center';
+      ctx.fillStyle = 'white';
+      ctx.font = `${Math.round(canvas.width * 0.06)}px Arial`;
+      ctx.fillText('AUTHORIZED HUMAN', canvas.width / 2, canvas.height / 2 - 20);
+
+      // Draw a circular check badge
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2 + 50;
+      const radius = Math.min(canvas.width, canvas.height) * 0.06;
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+      ctx.fillStyle = 'white';
+      ctx.fill();
+
+      // Check mark
+      ctx.strokeStyle = 'rgba(0, 140, 0, 1)';
+      ctx.lineWidth = Math.max(6, radius * 0.2);
+      ctx.beginPath();
+      ctx.moveTo(cx - radius * 0.5, cy - 0.05 * radius);
+      ctx.lineTo(cx - radius * 0.1, cy + radius * 0.35);
+      ctx.lineTo(cx + radius * 0.6, cy - radius * 0.45);
+      ctx.stroke();
+
+      ctx.restore();
+      return;
+    }
 
     // Draw challenge information if available
     if (result.details['current_challenge']) {
-      // Draw challenge panel
+      // Draw challenge panel (more opaque)
       const panelTop = 50;
       const panelWidth = canvas.width / 2 - 20;
       const panelHeight = 100;
 
-      ctx.fillStyle = 'rgba(40, 40, 80, 0.7)';
+      ctx.save();
+      ctx.shadowColor = 'rgba(0,0,0,0.6)';
+      ctx.shadowBlur = 18;
+      ctx.fillStyle = 'rgba(30, 30, 60, 0.96)'; // nearly opaque
       ctx.fillRect(10, panelTop, panelWidth, panelHeight);
+      ctx.lineWidth = 2;
       ctx.strokeStyle = 'rgba(100, 100, 180, 1)';
       ctx.strokeRect(10, panelTop, panelWidth, panelHeight);
+      ctx.restore();
 
       // Draw challenge title
       ctx.font = '16px Arial';
@@ -199,21 +277,21 @@ export class AuthPageComponent implements OnDestroy {
         panelTop + 50
       );
 
-      // Draw challenge progress
-      const completedChallenges = result.details['successful_challenges_count'] || 0;
-      const requiredChallenges = result.details['required_challenges'] || 3;
-
+      // Draw challenge progress (we computed totals above)
       ctx.font = '16px Arial';
       ctx.fillStyle = 'white';
-      ctx.fillText(`Progress: ${completedChallenges}/${requiredChallenges}`, canvas.width - 150, 30);
+      ctx.textAlign = 'right';
+      ctx.fillText(`Progress: ${completedChallenges}/${requiredChallenges}`, canvas.width - 20, 30);
 
-      // Draw progress circles
+      // Draw progress circles on the right
+      ctx.textAlign = 'start';
       const circleRadius = 8;
       const circleSpacing = 25;
       const circleY = 50;
+      const baseX = canvas.width - 150;
 
       for (let i = 0; i < requiredChallenges; i++) {
-        const circleX = canvas.width - 150 + i * circleSpacing;
+        const circleX = baseX + i * circleSpacing;
 
         // Draw circle outline
         ctx.beginPath();
@@ -241,14 +319,21 @@ export class AuthPageComponent implements OnDestroy {
       const y = point.y * this.canvas.nativeElement.height;
 
       ctx.beginPath();
-      ctx.arc(x, y, 1, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(0, 255, 0, 0.7)';
+      ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+      // Bright, nearly-opaque points with a soft glow
+      ctx.save();
+      ctx.fillStyle = 'rgba(0, 255, 0, 0.95)';
+      ctx.shadowColor = 'rgba(0, 255, 0, 0.55)';
+      ctx.shadowBlur = 10;
       ctx.fill();
+      ctx.restore();
     }
 
     // Draw connections between landmarks
-    ctx.strokeStyle = 'rgba(0, 255, 0, 0.5)';
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = 'rgba(0, 255, 0, 0.95)';
+    ctx.lineWidth = 2;
+    ctx.shadowColor = 'rgba(0, 255, 0, 0.35)';
+    ctx.shadowBlur = 8;
 
     for (const [i, j] of FACE_CONNECTIONS) {
       if (landmarks[i] && landmarks[j]) {
@@ -263,6 +348,9 @@ export class AuthPageComponent implements OnDestroy {
         ctx.stroke();
       }
     }
+    // Reset shadow to avoid affecting subsequent draws
+    ctx.shadowBlur = 0;
+    ctx.shadowColor = 'transparent';
   }
 
   drawHandLandmarks(ctx: CanvasRenderingContext2D, landmarks: any[]) {
@@ -277,25 +365,29 @@ export class AuthPageComponent implements OnDestroy {
       // Different colors for different fingers
       let color;
       if (i <= 4) { // Thumb
-        color = 'rgba(255, 0, 0, 0.7)';
+        color = 'rgba(255, 0, 0, 0.95)';
       } else if (i <= 8) { // Index finger
-        color = 'rgba(0, 255, 0, 0.7)';
+        color = 'rgba(0, 255, 0, 0.95)';
       } else if (i <= 12) { // Middle finger
-        color = 'rgba(255, 0, 255, 0.7)';
+        color = 'rgba(255, 0, 255, 0.95)';
       } else if (i <= 16) { // Ring finger
-        color = 'rgba(255, 255, 0, 0.7)';
+        color = 'rgba(255, 255, 0, 0.95)';
       } else { // Pinky
-        color = 'rgba(0, 255, 255, 0.7)';
+        color = 'rgba(0, 255, 255, 0.95)';
       }
 
       ctx.beginPath();
-      ctx.arc(x, y, 3, 0, Math.PI * 2);
+      ctx.arc(x, y, 4, 0, Math.PI * 2);
+      ctx.save();
       ctx.fillStyle = color;
+      ctx.shadowColor = color.replace(/0\.95\)$/, '0.5)');
+      ctx.shadowBlur = 10;
       ctx.fill();
+      ctx.restore();
     }
 
     // Draw connections between landmarks
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 3;
 
     for (const [i, j] of HAND_CONNECTIONS) {
       if (landmarks[i] && landmarks[j]) {
@@ -307,15 +399,15 @@ export class AuthPageComponent implements OnDestroy {
         // Different colors for different fingers
         let color;
         if (i <= 4 || j <= 4) { // Thumb
-          color = 'rgba(255, 0, 0, 0.7)';
+          color = 'rgba(255, 0, 0, 0.95)';
         } else if (i <= 8 || j <= 8) { // Index finger
-          color = 'rgba(0, 255, 0, 0.7)';
+          color = 'rgba(0, 255, 0, 0.95)';
         } else if (i <= 12 || j <= 12) { // Middle finger
-          color = 'rgba(255, 0, 255, 0.7)';
+          color = 'rgba(255, 0, 255, 0.95)';
         } else if (i <= 16 || j <= 16) { // Ring finger
-          color = 'rgba(255, 255, 0, 0.7)';
+          color = 'rgba(255, 255, 0, 0.95)';
         } else { // Pinky
-          color = 'rgba(0, 255, 255, 0.7)';
+          color = 'rgba(0, 255, 255, 0.95)';
         }
 
         ctx.strokeStyle = color;
@@ -325,6 +417,9 @@ export class AuthPageComponent implements OnDestroy {
         ctx.stroke();
       }
     }
+    // Reset any lingering shadow state
+    ctx.shadowBlur = 0;
+    ctx.shadowColor = 'transparent';
   }
 
   ngOnDestroy() {
