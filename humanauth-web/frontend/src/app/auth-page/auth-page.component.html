@@ -1,0 +1,118 @@
+<!-- Enhanced capture/auth panel (no external deps) -->
+
+<section class="ha-panel">
+
+  <!-- Header / status strip -->
+  <div class="ha-header">
+    <div class="ha-title">
+      <div class="ha-mark" aria-hidden="true"></div>
+      <div class="ha-title-text">
+        <h1 class="ha-h1">HumanAuth Web</h1>
+        <p class="ha-sub">Align your face in the frame. Keep lighting steady for best results.</p>
+      </div>
+    </div>
+
+    <div class="ha-badges" *ngIf="result">
+      <span class="ha-badge" [class.ok]="result.authenticated" [class.warn]="!result.authenticated">
+        <span class="ha-dot" aria-hidden="true"></span>
+        {{ result.authenticated ? "Authenticated" : "Authenticating" }}
+      </span>
+      <span class="ha-badge">
+        Confidence: {{ (result.confidence * 100) | number:'1.0-0' }}%
+      </span>
+    </div>
+
+    <div class="ha-badges" *ngIf="!result">
+      <span class="ha-badge">
+        <span class="ha-dot idle" aria-hidden="true"></span>
+        Ready
+      </span>
+    </div>
+  </div>
+
+  <!-- Camera stage -->
+  <div class="ha-stage" [class.running]="running">
+    <div class="ha-stage-inner">
+      <video #video muted playsinline class="ha-video"></video>
+      <canvas #canvas class="ha-canvas"></canvas>
+
+      <!-- Overlay hints -->
+      <div class="ha-overlay">
+        <div class="ha-corner tl"></div>
+        <div class="ha-corner tr"></div>
+        <div class="ha-corner bl"></div>
+        <div class="ha-corner br"></div>
+
+        <div class="ha-hint" *ngIf="!running">
+          <div class="ha-hint-title">Camera preview</div>
+          <div class="ha-hint-body">Press <b>Start</b> to begin authentication.</div>
+        </div>
+
+        <div class="ha-live" *ngIf="running">
+          <span class="ha-pulse" aria-hidden="true"></span>
+          Live
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="ha-controls">
+    <button class="ha-btn primary" (click)="start()" [disabled]="running">
+      <span class="ha-btn-ic" aria-hidden="true">▶</span>
+      Start
+    </button>
+
+    <button class="ha-btn ghost" (click)="stop()" [disabled]="!running">
+      <span class="ha-btn-ic" aria-hidden="true">■</span>
+      Stop
+    </button>
+
+    <div class="ha-spacer"></div>
+
+    <div class="ha-mini" *ngIf="result && !error">
+      <div class="ha-mini-msg">{{ result.message }}</div>
+    </div>
+
+    <div class="ha-mini error" *ngIf="error">
+      <div class="ha-mini-msg">{{ error }}</div>
+    </div>
+  </div>
+
+  <!-- Detail card -->
+  <div class="ha-detail" *ngIf="result && !error">
+    <div class="ha-detail-row">
+      <div class="ha-kv">
+        <div class="ha-k">Status</div>
+        <div class="ha-v" [class.ok]="result.authenticated" [class.warn]="!result.authenticated">
+          {{ result.authenticated ? "Authenticated" : "Authenticating" }}
+        </div>
+      </div>
+
+      <div class="ha-kv">
+        <div class="ha-k">Confidence</div>
+        <div class="ha-v">{{ (result.confidence * 100) | number:'1.0-0' }}%</div>
+      </div>
+    </div>
+
+    <div class="ha-meter">
+      <div class="ha-meter-label">Confidence meter</div>
+      <div
+        class="ha-meter-track"
+        role="progressbar"
+        [attr.aria-valuenow]="(result.confidence * 100) | number:'1.0-0'"
+        aria-valuemin="0"
+        aria-valuemax="100"
+      >
+        <div
+          class="ha-meter-fill"
+          [style.width.%]="(result.confidence || 0) * 100"
+          [class.ok]="result.authenticated"
+        ></div>
+      </div>
+    </div>
+
+    <p class="ha-message">{{ result.message }}</p>
+  </div>
+
+</section>
