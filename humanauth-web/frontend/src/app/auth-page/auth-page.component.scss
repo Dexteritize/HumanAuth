@@ -402,40 +402,46 @@
   color: rgba(255, 214, 102, 0.95);
 }
 
-.ha-meter {
-  margin-top: 12px;
+/* Prominent challenge card displayed in the main panel */
+.ha-challenge-card {
+  margin: 12px 0 8px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+
+  /* Match panel theming with a subtle gradient accent */
+  background: linear-gradient(180deg, rgba(20,22,40,0.96), rgba(28,30,54,0.98));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 12px 34px rgba(5, 8, 20, 0.6);
+  color: rgba(255,255,255,0.95);
 }
 
-.ha-meter-label {
-  color: rgba(255, 255, 255, 0.62);
+.ha-challenge-title {
   font-size: 0.85rem;
-  margin-bottom: 8px;
+  font-weight: 700;
+  color: rgb(150, 150, 255);
+  letter-spacing: 0.04em;
 }
 
-.ha-meter-track {
-  height: 12px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  overflow: hidden;
+.ha-challenge-body {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: rgba(255,255,255,0.98);
 }
 
-.ha-meter-fill {
-  height: 100%;
-  width: 0%;
-  border-radius: 999px;
-  background: rgba(114, 184, 255, 0.75);
-  transition: width 180ms ease;
+.ha-challenge-progress {
+  font-size: 0.95rem;
+  color: rgba(200,200,220,0.85);
+  margin-top: 4px;
 }
 
-.ha-meter-fill.ok {
-  background: rgba(108, 255, 214, 0.75);
-}
-
-.ha-message {
-  margin: 12px 0 0;
-  color: rgba(255, 255, 255, 0.78);
-  line-height: 1.45;
+@media (min-width: 900px) {
+  .ha-challenge-card {
+    max-width: 680px;
+  }
 }
 
 /* Responsive header layout */

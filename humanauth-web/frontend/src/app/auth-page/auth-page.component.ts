@@ -422,6 +422,14 @@ export class AuthPageComponent implements OnDestroy {
     ctx.shadowColor = 'transparent';
   }
 
+  // Helper: format challenge names for display (e.g. "turn_head_left" -> "Turn Head Left")
+  formatChallengeName(challenge: string | undefined): string {
+    if (!challenge) return "";
+    return challenge
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+
   ngOnDestroy() {
     // Stop all processes
     this.stop();
