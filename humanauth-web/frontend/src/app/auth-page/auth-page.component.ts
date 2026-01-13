@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild, OnDestroy } from "@angular/core";
+import { Component, ElementRef, ViewChild, OnDestroy, NgZone } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { CameraService } from "../services/camera.service";
 import { AuthService, AuthResult } from "../services/auth.service";
@@ -60,7 +60,11 @@ export class AuthPageComponent implements OnDestroy {
   // Animation frame ID for cancellation
   private animationFrameId?: number;
 
-  constructor(private cam: CameraService, private auth: AuthService) {
+  constructor(
+    private cam: CameraService,
+    private auth: AuthService,
+    private zone: NgZone
+  ) {
     // Create a hidden canvas for frame capture to avoid dimension conflicts
     this.captureCanvas = document.createElement('canvas');
     this.captureCanvas.style.display = 'none';
@@ -129,15 +133,20 @@ export class AuthPageComponent implements OnDestroy {
         0.7 // Balance between quality and performance
       );
 
-      this.result = await this.auth.processFrame(frame);
+      const result = await this.auth.processFrame(frame);
+      this.zone.run(() => {
+        this.result = result;
+      });
 
       // Draw visual indicators based on the result
-      this.drawVisualIndicators(this.result);
+      this.drawVisualIndicators(result);
     } catch (e: any) {
       // On any processing error, surface the message and stop the session.
       // This ensures the system does not continue or auto-restart; user must press Start.
-      this.error = e?.message || String(e);
-      this.running = false;
+      this.zone.run(() => {
+        this.error = e?.message || String(e);
+        this.running = false;
+      });
       // Clean up resources to leave a consistent stopped state
       try { this.cam.stop(); } catch { /* noop */ }
       try { this.auth.disconnect(); } catch { /* noop */ }
