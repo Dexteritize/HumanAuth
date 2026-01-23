@@ -2,7 +2,7 @@
 """
 HumanAuth Web Demo - Backend Server (app.py)
 
-Flask + Socket.IO backend that:
+Flask REST API backend that:
 - Starts auth sessions
 - Accepts webcam frames as base64 (data URL or raw base64)
 - Runs HumanAuth.update(frame)
@@ -29,7 +29,6 @@ import cv2
 import numpy as np
 from flask import Flask, request, jsonify, g
 from flask_cors import CORS
-from flask_socketio import SocketIO, emit
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
@@ -93,9 +92,6 @@ limiter = Limiter(
     default_limits=["200 per day", "50 per hour"],
     storage_uri="memory://",
 )
-
-# Threading mode is the least painful in dev. If you install eventlet/gevent, you can change this.
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
 # ------------------------------------------------------------------------------
 # Authentication & Authorization
@@ -503,105 +499,8 @@ def process_frame():
 
 
 # ------------------------------------------------------------------------------
-# Socket.IO events
-# ------------------------------------------------------------------------------
-@socketio.on("connect")
-def handle_connect():
-    logger.info(f"Client connected: {request.sid}")
-    emit("connected", {"status": "connected"})
-
-
-@socketio.on("disconnect")
-def handle_disconnect():
-    logger.info(f"Client disconnected: {request.sid}")
-
-
-@socketio.on("start_auth")
-def handle_start_auth():
-    session_id = f"session_{uuid.uuid4().hex}"
-
-    mx = models_exist()
-    if not (mx["face"] or mx["hand"]):
-        emit(
-            "auth_started",
-            {
-                "status": "error",
-                "message": "Model files not found. Put .task files in backend/ or set env vars.",
-                "debug": mx,
-            },
-        )
-        return
-
-    try:
-        auth_sessions[session_id] = HumanAuth(FACE_MODEL_PATH, HAND_MODEL_PATH)
-        emit("auth_started", {"status": "success", "session_id": session_id, "message": "Authentication session started"})
-    except Exception as e:
-        logger.exception("Error starting authentication session (socket)")
-        emit("auth_started", {"status": "error", "message": f"Failed to start authentication session: {str(e)}"})
-
-
-@socketio.on("reset_auth")
-def handle_reset_auth(data):
-    session_id = (data or {}).get("session_id")
-    if not session_id or session_id not in auth_sessions:
-        emit("auth_reset", {"status": "error", "message": "Invalid session ID"})
-        return
-
-    try:
-        auth_sessions[session_id] = HumanAuth(FACE_MODEL_PATH, HAND_MODEL_PATH)
-        emit("auth_reset", {"status": "success", "message": "Authentication session reset"})
-    except Exception as e:
-        logger.exception("Error resetting authentication session (socket)")
-        emit("auth_reset", {"status": "error", "message": f"Failed to reset authentication session: {str(e)}"})
-
-
-@socketio.on("process_frame")
-def handle_process_frame(data):
-    session_id = (data or {}).get("session_id")
-    frame_data = (data or {}).get("frame")
-
-    if not session_id or session_id not in auth_sessions:
-        emit("frame_processed", {"status": "error", "message": "Invalid session ID"})
-        return
-
-    if not frame_data:
-        emit("frame_processed", {"status": "error", "message": "No frame data provided"})
-        return
-
-    frame = decode_frame(frame_data)
-    if frame is None:
-        emit("frame_processed", {"status": "error", "message": "Frame decode failed (bad base64 or invalid image)."})
-        return
-
-    try:
-        auth = auth_sessions[session_id]
-        result = auth.update(frame)
-
-        result_dict = {
-            "authenticated": bool(result.authenticated),
-            "confidence": float(result.confidence),
-            "message": result.message,
-            "details": {
-                k: (float(v) if isinstance(v, (int, float, np.number)) else v)
-                for k, v in (result.details or {}).items()
-            },
-        }
-        
-        # Log challenge information for debugging
-        if result.details and 'current_challenge' in result.details:
-            logger.info(f"Challenge info: current={result.details.get('current_challenge')}, "
-                       f"completed={result.details.get('challenge_completed')}, "
-                       f"count={result.details.get('successful_challenges_count')}/{result.details.get('required_challenges')}")
-        
-        emit("frame_processed", {"status": "success", "result": result_dict})
-    except Exception as e:
-        logger.exception("Error processing frame (socket)")
-        emit("frame_processed", {"status": "error", "message": f"Failed to process frame: {str(e)}"})
-
-
-# ------------------------------------------------------------------------------
 # Main
 # ------------------------------------------------------------------------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
-    socketio.run(app, host="0.0.0.0", port=port, debug=True, allow_unsafe_werkzeug=True)
+    app.run(host="0.0.0.0", port=port, debug=True)
