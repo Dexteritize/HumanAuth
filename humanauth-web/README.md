@@ -12,7 +12,8 @@ HumanAuth Web Demo is a complete web application that demonstrates human authent
 - Interactive challenge-response authentication
 - Visual feedback with face and hand mesh visualization
 - Progress tracking for authentication challenges
-- WebSocket communication for low-latency processing
+- REST API for integration with external applications
+- API key authentication for secure access
 
 ## Requirements
 

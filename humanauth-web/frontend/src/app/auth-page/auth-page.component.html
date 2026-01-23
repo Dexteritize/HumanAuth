@@ -30,17 +30,7 @@
     </div>
   </div>
 
-  <!-- Prominent challenge card (FORCED VISIBLE for testing). Shows real challenge if provided, otherwise a test placeholder. -->
-  <div class="ha-challenge-card">
-    <div class="ha-challenge-title">CURRENT CHALLENGE</div>
-    <div class="ha-challenge-body">
-      <ng-container *ngIf="result && result.details && result.details['current_challenge']; else testPlaceholder">
-        {{ formatChallengeName(result.details['current_challenge']) }}
-      </ng-container>
-      <ng-template #testPlaceholder>Test challenge: Look Left</ng-template>
-    </div>
-    <div class="ha-challenge-progress">Progress: {{ (result && result.details && result.details['successful_challenges_count']) || 0 }} / {{ (result && result.details && result.details['required_challenges']) || 3 }}</div>
-  </div>
+  <!-- Challenge card removed from outside the video frame as per requirements -->
 
   <!-- Camera stage -->
   <div class="ha-stage" [class.running]="running">
@@ -58,6 +48,20 @@
         <div class="ha-hint" *ngIf="!running">
           <div class="ha-hint-title">Camera preview</div>
           <div class="ha-hint-body">Press <b>Start</b> to begin authentication.</div>
+        </div>
+
+        <!-- In-video challenge card - only shown when running -->
+        <div class="ha-in-video-challenge" *ngIf="running && result && result.details">
+          <div class="ha-challenge-title">CURRENT CHALLENGE</div>
+          <div class="ha-challenge-body">
+            <ng-container *ngIf="result.details['current_challenge']; else testPlaceholder">
+              {{ formatChallengeName(result.details['current_challenge']) }}
+            </ng-container>
+            <ng-template #testPlaceholder>Look Left</ng-template>
+          </div>
+          <div class="ha-challenge-progress">
+            Progress: {{ result.details['successful_challenges_count'] || 0 }} / {{ result.details['required_challenges'] || 3 }}
+          </div>
         </div>
 
         <div class="ha-live" *ngIf="running">

@@ -1,0 +1,321 @@
+<div class="architecture-container">
+  <h2>HumanAuth System Architecture</h2>
+
+  <div class="architecture-intro">
+    <p>
+      HumanAuth is a comprehensive human authentication system that uses face and hand recognition to verify
+      that a user is a real human rather than a bot or spoofing attempt. This page explains the architecture
+      of the system, from the internal backend components to the API and frontend.
+    </p>
+  </div>
+
+  <div class="architecture-overview">
+    <h3>System Overview</h3>
+    <div class="architecture-diagram">
+      <div class="diagram-container">
+        <!-- Architecture diagram representation -->
+        <div class="diagram-box frontend">
+          <h4>Frontend</h4>
+          <div class="diagram-content">
+            <p>Angular Application</p>
+            <ul>
+              <li>Components</li>
+              <li>Services</li>
+              <li>Camera Access</li>
+            </ul>
+          </div>
+        </div>
+        <div class="diagram-arrow">→</div>
+        <div class="diagram-box api">
+          <h4>API</h4>
+          <div class="diagram-content">
+            <p>REST Endpoints</p>
+            <ul>
+              <li>Session Management</li>
+              <li>Frame Processing</li>
+              <li>Authentication</li>
+            </ul>
+          </div>
+        </div>
+        <div class="diagram-arrow">→</div>
+        <div class="diagram-box backend">
+          <h4>Backend</h4>
+          <div class="diagram-content">
+            <p>Python Flask Server</p>
+            <ul>
+              <li>MediaPipe Integration</li>
+              <li>Face & Hand Detection</li>
+              <li>Challenge Generation</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p>
+      The HumanAuth system consists of three main components: a frontend Angular application, a REST API, and a
+      backend Python server. The frontend captures camera frames and sends them to the backend via the API.
+      The backend processes these frames using MediaPipe to detect faces and hands, and verifies that the user
+      is a real human by issuing challenges and analyzing responses.
+    </p>
+  </div>
+
+  <div class="architecture-section">
+    <h3>Backend Architecture</h3>
+    <div class="component-details">
+      <h4>Flask Server (app.py)</h4>
+      <p>
+        The backend is built with Flask, a lightweight Python web framework. It provides REST API endpoints
+        for the frontend to communicate with, as well as WebSocket support for real-time communication.
+      </p>
+      <div class="code-example">
+        <pre><code>
+# Key components in app.py
+- REST API endpoints for session management and frame processing
+- WebSocket handlers for real-time communication
+- Authentication middleware for API key validation
+- Error handling and response formatting
+        </code></pre>
+      </div>
+
+      <h4>Human Authentication Engine (human_auth.py)</h4>
+      <p>
+        The core of the backend is the HumanAuth class, which handles the authentication logic. It uses
+        MediaPipe to detect face and hand landmarks, and implements various anti-spoofing techniques.
+      </p>
+      <div class="code-example">
+        <pre><code>
+# Key components in human_auth.py
+- Face landmark detection using MediaPipe
+- Hand gesture recognition
+- Challenge generation and verification
+- Anti-spoofing techniques:
+  - Micro-movement detection
+  - Blink pattern analysis
+  - 3D consistency checks
+  - Texture analysis
+        </code></pre>
+      </div>
+
+      <h4>MediaPipe Integration</h4>
+      <p>
+        HumanAuth uses MediaPipe, a cross-platform framework for building multimodal machine learning pipelines.
+        It leverages MediaPipe's face and hand landmark detection capabilities to track 468 distinct points on
+        the human face and 21 points on each hand in real-time.
+      </p>
+      <div class="tech-details">
+        <div class="tech-item">
+          <h5>Face Landmark Detection</h5>
+          <p>
+            Tracks 468 3D points on the face to analyze facial expressions, head pose, and natural micro-movements.
+          </p>
+        </div>
+        <div class="tech-item">
+          <h5>Hand Landmark Detection</h5>
+          <p>
+            Tracks 21 points on each hand to recognize gestures and verify interactive challenges.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="architecture-section">
+    <h3>Frontend Architecture</h3>
+    <div class="component-details">
+      <h4>Angular Application</h4>
+      <p>
+        The frontend is built with Angular, a platform and framework for building single-page client applications.
+        It provides a responsive user interface for the authentication process.
+      </p>
+
+      <h4>Key Components</h4>
+      <div class="tech-details">
+        <div class="tech-item">
+          <h5>Auth Page Component</h5>
+          <p>
+            Handles the user interface for the authentication process, including camera preview, challenge display,
+            and feedback.
+          </p>
+        </div>
+        <div class="tech-item">
+          <h5>Camera Service</h5>
+          <p>
+            Manages camera access, frame capture, and processing before sending to the backend.
+          </p>
+          <div class="code-example">
+            <pre><code>
+// Key methods in camera.service.ts
+- start(): Initializes the camera stream
+- stop(): Stops the camera stream
+- capture(): Captures a frame from the video stream
+            </code></pre>
+          </div>
+        </div>
+        <div class="tech-item">
+          <h5>Auth Service</h5>
+          <p>
+            Handles communication with the backend API, including session management and frame processing.
+          </p>
+          <div class="code-example">
+            <pre><code>
+// Key methods in auth.service.ts
+- initialize(): Fetches API configuration
+- startAuth(): Starts a new authentication session
+- processFrame(): Sends a frame to the backend for processing
+- resetAuth(): Resets the current authentication session
+            </code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="architecture-section">
+    <h3>API Communication</h3>
+    <div class="component-details">
+      <h4>REST API Endpoints</h4>
+      <p>
+        The backend exposes several REST API endpoints for the frontend to communicate with:
+      </p>
+      <div class="api-endpoints">
+        <div class="endpoint">
+          <h5>GET /api/config</h5>
+          <p>Returns API configuration, including the API key and URL.</p>
+        </div>
+        <div class="endpoint">
+          <h5>POST /api/sessions</h5>
+          <p>Creates a new authentication session and returns a session ID.</p>
+        </div>
+        <div class="endpoint">
+          <h5>POST /api/sessions/&#123;session_id&#125;/process</h5>
+          <p>Processes a frame in the current authentication session and returns the result.</p>
+        </div>
+        <div class="endpoint">
+          <h5>POST /api/sessions/&#123;session_id&#125;/reset</h5>
+          <p>Resets the current authentication session.</p>
+        </div>
+        <div class="endpoint">
+          <h5>POST /api/verify</h5>
+          <p>Verifies a single frame without maintaining a session.</p>
+        </div>
+      </div>
+
+      <h4>WebSocket Communication</h4>
+      <p>
+        In addition to REST API endpoints, the backend also supports WebSocket communication for real-time
+        interaction during the authentication process.
+      </p>
+      <div class="code-example">
+        <pre><code>
+# WebSocket events
+- connect: Client connects to the server
+- disconnect: Client disconnects from the server
+- start_auth: Client starts a new authentication session
+- reset_auth: Client resets the current authentication session
+- process_frame: Client sends a frame for processing
+        </code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="architecture-section">
+    <h3>Authentication Flow</h3>
+    <div class="flow-diagram">
+      <div class="flow-step">
+        <div class="flow-number">1</div>
+        <div class="flow-content">
+          <h5>Initialize</h5>
+          <p>Frontend initializes and fetches API configuration</p>
+        </div>
+      </div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step">
+        <div class="flow-number">2</div>
+        <div class="flow-content">
+          <h5>Start Session</h5>
+          <p>User clicks "Start" to begin authentication</p>
+        </div>
+      </div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step">
+        <div class="flow-number">3</div>
+        <div class="flow-content">
+          <h5>Issue Challenge</h5>
+          <p>Backend issues a challenge (turn head, show hand)</p>
+        </div>
+      </div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step">
+        <div class="flow-number">4</div>
+        <div class="flow-content">
+          <h5>Process Frames</h5>
+          <p>Frontend sends frames, backend analyzes response</p>
+        </div>
+      </div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step">
+        <div class="flow-number">5</div>
+        <div class="flow-content">
+          <h5>Verify Human</h5>
+          <p>Backend confirms user is human after completing challenges</p>
+        </div>
+      </div>
+    </div>
+    <p>
+      The authentication process begins when the user clicks "Start" on the frontend. The backend creates a new
+      session and issues a series of challenges, such as turning the head or showing a specific hand gesture.
+      The frontend captures frames from the user's camera and sends them to the backend for processing.
+      The backend analyzes these frames using MediaPipe to detect face and hand landmarks, and verifies that
+      the user is responding correctly to the challenges. After the user successfully completes all challenges,
+      the backend confirms that the user is a real human.
+    </p>
+  </div>
+
+  <div class="architecture-section">
+    <h3>Security Considerations</h3>
+    <div class="component-details">
+      <h4>Anti-Spoofing Techniques</h4>
+      <p>
+        HumanAuth implements several anti-spoofing techniques to prevent attackers from using photos, videos,
+        or masks to bypass the authentication:
+      </p>
+      <div class="tech-details">
+        <div class="tech-item">
+          <h5>Micro-Movement Detection</h5>
+          <p>
+            Analyzes natural micro-movements in the face that are difficult to simulate in static images or pre-recorded videos.
+          </p>
+        </div>
+        <div class="tech-item">
+          <h5>Blink Pattern Analysis</h5>
+          <p>
+            Detects natural blinking patterns that are hard to fake in static images or masks.
+          </p>
+        </div>
+        <div class="tech-item">
+          <h5>3D Consistency Checks</h5>
+          <p>
+            Verifies that the face landmarks are consistent with a 3D human face rather than a 2D image.
+          </p>
+        </div>
+        <div class="tech-item">
+          <h5>Interactive Challenges</h5>
+          <p>
+            Requires the user to perform specific actions that are difficult to predict and simulate.
+          </p>
+        </div>
+      </div>
+
+      <h4>Privacy Considerations</h4>
+      <p>
+        HumanAuth is designed with privacy in mind:
+      </p>
+      <ul>
+        <li>All processing happens locally on the server</li>
+        <li>No biometric data is stored long-term</li>
+        <li>Session data is temporary and deleted after authentication</li>
+        <li>No personal identification is required</li>
+      </ul>
+    </div>
+  </div>
+</div>

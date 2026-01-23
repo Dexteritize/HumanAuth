@@ -262,7 +262,10 @@
 
 <div class="page">
   <div class="app-container">
+    <app-nav-bar></app-nav-bar>
+
     <header class="hero">
+      <!-- Hero content will be different on each page via router outlet -->
       <div class="hero-top">
         <div class="brand">
           <div class="logo" aria-hidden="true"></div>
@@ -293,7 +296,7 @@
       <div class="content-shell-inner">
         <router-outlet></router-outlet>
       </div>
-      <div class="footer-hint">Tip: Use consistent lighting for best recognition.</div>
+      <app-footer></app-footer>
     </section>
   </div>
 </div>

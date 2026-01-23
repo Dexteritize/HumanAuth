@@ -1,0 +1,302 @@
+.architecture-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px 0;
+}
+
+h2 {
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  text-align: center;
+  margin-bottom: 30px;
+  background: linear-gradient(to right, rgba(114, 184, 255, 0.9), rgba(255, 140, 223, 0.9));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 700;
+}
+
+h3 {
+  font-size: 1.6rem;
+  margin: 0 0 20px;
+  color: var(--text);
+  position: relative;
+  padding-bottom: 10px;
+}
+
+h3::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(to right, rgba(114, 184, 255, 0.7), rgba(255, 140, 223, 0.7));
+  border-radius: 3px;
+}
+
+h4 {
+  font-size: 1.3rem;
+  margin: 25px 0 15px;
+  color: var(--text);
+}
+
+h5 {
+  font-size: 1.1rem;
+  margin: 15px 0 10px;
+  color: var(--text);
+}
+
+p {
+  color: var(--muted);
+  line-height: 1.7;
+  margin-bottom: 15px;
+  font-size: 1.05rem;
+}
+
+ul {
+  color: var(--muted);
+  line-height: 1.6;
+  margin-bottom: 15px;
+  padding-left: 20px;
+}
+
+li {
+  margin-bottom: 8px;
+}
+
+.architecture-intro {
+  margin-bottom: 40px;
+  text-align: center;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.architecture-section {
+  margin-bottom: 60px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Architecture diagram */
+.architecture-diagram {
+  margin: 30px 0;
+}
+
+.diagram-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.diagram-box {
+  flex: 1;
+  min-width: 200px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.diagram-box:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.diagram-box h4 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.diagram-box.frontend {
+  background: linear-gradient(135deg, rgba(114, 184, 255, 0.1), rgba(114, 184, 255, 0.05));
+  border-color: rgba(114, 184, 255, 0.2);
+}
+
+.diagram-box.api {
+  background: linear-gradient(135deg, rgba(255, 140, 223, 0.1), rgba(255, 140, 223, 0.05));
+  border-color: rgba(255, 140, 223, 0.2);
+}
+
+.diagram-box.backend {
+  background: linear-gradient(135deg, rgba(108, 255, 214, 0.1), rgba(108, 255, 214, 0.05));
+  border-color: rgba(108, 255, 214, 0.2);
+}
+
+.diagram-arrow {
+  font-size: 1.5rem;
+  color: var(--muted);
+}
+
+.diagram-content {
+  text-align: left;
+}
+
+.diagram-content p {
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.diagram-content ul {
+  margin-bottom: 0;
+}
+
+/* Code examples */
+.code-example {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 15px;
+  margin: 15px 0 25px;
+  overflow-x: auto;
+}
+
+.code-example pre {
+  margin: 0;
+}
+
+.code-example code {
+  color: rgba(255, 255, 255, 0.85);
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* Component details */
+.component-details {
+  margin-bottom: 30px;
+}
+
+.tech-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin: 20px 0;
+}
+
+.tech-item {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 20px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.tech-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.tech-item h5 {
+  margin-top: 0;
+}
+
+.tech-item p {
+  margin-bottom: 0;
+}
+
+/* API endpoints */
+.api-endpoints {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 15px;
+  margin: 20px 0;
+}
+
+.endpoint {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 15px;
+}
+
+.endpoint h5 {
+  margin-top: 0;
+  color: rgba(114, 184, 255, 0.9);
+  font-family: 'Courier New', monospace;
+}
+
+.endpoint p {
+  margin-bottom: 0;
+}
+
+/* Flow diagram */
+.flow-diagram {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 30px 0;
+}
+
+.flow-step {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 15px;
+  width: 100%;
+  max-width: 600px;
+}
+
+.flow-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, rgba(114, 184, 255, 0.8), rgba(255, 140, 223, 0.8));
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.flow-content {
+  flex: 1;
+}
+
+.flow-content h5 {
+  margin: 0 0 5px;
+}
+
+.flow-content p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.flow-arrow {
+  color: var(--muted);
+  font-size: 1.5rem;
+  margin: 10px 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .diagram-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .diagram-arrow {
+    transform: rotate(90deg);
+    margin: 10px 0;
+  }
+
+  .tech-details,
+  .api-endpoints {
+    grid-template-columns: 1fr;
+  }
+
+  .flow-step {
+    max-width: 100%;
+  }
+}

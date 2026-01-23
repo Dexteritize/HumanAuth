@@ -6,7 +6,11 @@ export class CameraService {
 
   async start(video: HTMLVideoElement) {
     this.stream = await navigator.mediaDevices.getUserMedia({
-      video: { width: 1280, height: 720 },
+      video: {
+        width: { ideal: 640, max: 1280 },
+        height: { ideal: 480, max: 720 },
+        frameRate: { ideal: 15, max: 30 }
+      },
       audio: false,
     });
     video.srcObject = this.stream;
