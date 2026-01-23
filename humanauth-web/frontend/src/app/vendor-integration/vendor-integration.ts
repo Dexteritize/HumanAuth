@@ -3,11 +3,11 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
 @Component({
-  selector: 'app-architecture',
+  selector: 'app-vendor-integration',
   imports: [CommonModule, RouterLink],
-  templateUrl: './architecture.html',
-  styleUrl: './architecture.scss',
+  templateUrl: './vendor-integration.html',
+  styleUrl: './vendor-integration.scss',
 })
-export class Architecture {
+export class VendorIntegration {
   // No special functionality needed for this component
 }

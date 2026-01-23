@@ -348,82 +348,6 @@
         </div>
       </div>
 
-      <div class="flow-column vendor">
-        <h4>Vendor Integration Flow</h4>
-        <div class="flow-diagram">
-          <div class="flow-step">
-            <div class="flow-number">1</div>
-            <div class="flow-content">
-              <h5>API Configuration</h5>
-              <p>Vendor application configures API client</p>
-              <div class="flow-detail">
-                <code>apiClient.setConfig(&#123; apiKey, apiUrl &#125;)</code>
-                <span>Sets API key and endpoint URL</span>
-              </div>
-            </div>
-          </div>
-          <div class="flow-arrow">↓</div>
-          <div class="flow-step">
-            <div class="flow-number">2</div>
-            <div class="flow-content">
-              <h5>Custom UI Setup</h5>
-              <p>Vendor application initializes camera and UI</p>
-              <div class="flow-detail">
-                <code>setupCameraAccess()</code>
-                <span>Implements camera access using preferred method</span>
-              </div>
-            </div>
-          </div>
-          <div class="flow-arrow">↓</div>
-          <div class="flow-step">
-            <div class="flow-number">3</div>
-            <div class="flow-content">
-              <h5>Create Session</h5>
-              <p>Vendor application creates authentication session</p>
-              <div class="flow-detail">
-                <code>POST /api/v1/sessions</code>
-                <span>Headers: &#123; "X-API-Key": "vendor-api-key" &#125;</span>
-              </div>
-            </div>
-          </div>
-          <div class="flow-arrow">↓</div>
-          <div class="flow-step">
-            <div class="flow-number">4</div>
-            <div class="flow-content">
-              <h5>Process Frames</h5>
-              <p>Vendor application sends frames for processing</p>
-              <div class="flow-detail">
-                <code>POST /api/v1/sessions/:session_id/process</code>
-                <span>Body: &#123; "frame": "base64-encoded-image" &#125;</span>
-              </div>
-            </div>
-          </div>
-          <div class="flow-arrow">↓</div>
-          <div class="flow-step">
-            <div class="flow-number">5</div>
-            <div class="flow-content">
-              <h5>Custom Challenge Display</h5>
-              <p>Vendor application shows challenges in custom UI</p>
-              <div class="flow-detail">
-                <code>renderChallenge(result.details.current_challenge)</code>
-                <span>Displays challenge instructions in vendor's UI style</span>
-              </div>
-            </div>
-          </div>
-          <div class="flow-arrow">↓</div>
-          <div class="flow-step">
-            <div class="flow-number">6</div>
-            <div class="flow-content">
-              <h5>Business Logic Integration</h5>
-              <p>Vendor application integrates with business systems</p>
-              <div class="flow-detail">
-                <code>if (result.authenticated) &#123; grantAccess() &#125;</code>
-                <span>Triggers vendor-specific actions upon authentication</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
 
     <div class="backend-flow">
@@ -509,6 +433,26 @@
       Vendor applications can integrate with the same backend API but implement their own UI and business logic to fit their specific needs.
       Both integration paths follow the same core authentication flow but may differ in how they present challenges and handle the authentication result.
     </p>
+  </div>
+
+  <div class="architecture-section">
+    <h3>Vendor Integration</h3>
+
+    <div class="integration-overview">
+      <p>
+        Integrating HumanAuth into your application is straightforward. Our vendor integration guide demonstrates how easy it is
+        for vendors to add HumanAuth to their existing authentication systems.
+      </p>
+
+      <div class="vendor-integration-link">
+        <a routerLink="/vendor-integration" class="view-integration-guide">
+          View Vendor Integration Guide →
+        </a>
+        <p class="integration-description">
+          Our comprehensive guide includes step-by-step instructions, API reference, and integration benefits.
+        </p>
+      </div>
+    </div>
   </div>
 
   <div class="architecture-section">
@@ -654,38 +598,6 @@
         </div>
       </div>
 
-      <div class="vendor-integration-security">
-        <h4>Vendor Integration Security</h4>
-        <p>
-          When integrating HumanAuth with vendor systems, several security measures ensure safe and reliable operation:
-        </p>
-        <ul class="vendor-security-list">
-          <li>
-            <span class="vendor-security-icon cors"></span>
-            <span class="vendor-security-text">
-              <strong>CORS Protection:</strong> Configurable origin restrictions prevent unauthorized domains from accessing the API
-            </span>
-          </li>
-          <li>
-            <span class="vendor-security-icon api-key"></span>
-            <span class="vendor-security-text">
-              <strong>API Key Authentication:</strong> Unique API keys for each vendor ensure only authorized systems can access the service
-            </span>
-          </li>
-          <li>
-            <span class="vendor-security-icon rate"></span>
-            <span class="vendor-security-text">
-              <strong>Rate Limiting:</strong> Prevents abuse through configurable request limits per vendor
-            </span>
-          </li>
-          <li>
-            <span class="vendor-security-icon session"></span>
-            <span class="vendor-security-text">
-              <strong>Session Management:</strong> Unique session IDs prevent cross-session data access
-            </span>
-          </li>
-        </ul>
-      </div>
     </div>
   </div>
 </div>
