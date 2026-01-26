@@ -1,0 +1,510 @@
+<div class="architecture-container">
+  <h2>HumanAuth System Architecture</h2>
+
+  <div class="architecture-intro">
+    <p>
+      HumanAuth uses face and hand recognition to verify real humans versus bots or spoofing attempts.
+      This page outlines the system architecture from backend components to API and frontend integration.
+    </p>
+  </div>
+
+  <div class="architecture-overview">
+    <h3>System Overview</h3>
+    <div class="architecture-diagram">
+      <div class="diagram-container">
+        <div class="diagram-row">
+          <div class="diagram-column">
+            <div class="diagram-label">Client Applications</div>
+            <div class="diagram-box frontend">
+              <h4>Demo Page</h4>
+              <div class="diagram-content">
+                <p>Angular Application</p>
+                <ul>
+                  <li>Auth Page Component</li>
+                  <li>Camera Service</li>
+                  <li>Auth Service</li>
+                </ul>
+              </div>
+            </div>
+            <div class="diagram-arrow down">↓</div>
+            <div class="diagram-box frontend vendor">
+              <h4>Vendor Integration</h4>
+              <div class="diagram-content">
+                <p>External Applications</p>
+                <ul>
+                  <li>Custom UI</li>
+                  <li>API Client</li>
+                  <li>Business Logic</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="diagram-column">
+            <div class="diagram-label">Communication</div>
+            <div class="diagram-box api">
+              <h4>REST API</h4>
+              <div class="diagram-content">
+                <p>HTTP Endpoints</p>
+                <ul>
+                  <li>Session Management</li>
+                  <li>Frame Processing</li>
+                  <li>Authentication</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="diagram-column">
+            <div class="diagram-label">Server Components</div>
+            <div class="diagram-box backend">
+              <h4>Flask Server</h4>
+              <div class="diagram-content">
+                <p>API Handlers</p>
+                <ul>
+                  <li>Request Validation</li>
+                  <li>Session Management</li>
+                  <li>CORS & Security</li>
+                </ul>
+              </div>
+            </div>
+            <div class="diagram-arrow down">↓</div>
+            <div class="diagram-box backend engine">
+              <h4>HumanAuth Engine</h4>
+              <div class="diagram-content">
+                <p>Core Authentication</p>
+                <ul>
+                  <li>MediaPipe Integration</li>
+                  <li>Face & Hand Detection</li>
+                  <li>Challenge Generation</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="integration-points">
+      <h4>Integration Points</h4>
+      <div class="integration-row">
+        <div class="integration-box demo">
+          <h5>Demo Page Integration</h5>
+          <p>Reference implementation with:</p>
+          <ul>
+            <li>Camera access and frame capture</li>
+            <li>API communication</li>
+            <li>Challenge display and feedback</li>
+          </ul>
+        </div>
+        <div class="integration-box vendor">
+          <h5>Vendor Integration</h5>
+          <p>External applications connect via:</p>
+          <ul>
+            <li>REST API with API key auth</li>
+            <li>CORS support</li>
+            <li>Standardized JSON responses</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <p>
+      The frontend captures camera frames and sends them to the backend via the API.
+      The backend processes these frames using MediaPipe to detect faces and hands, verifying human presence
+      through interactive challenges.
+    </p>
+  </div>
+
+  <div class="architecture-section">
+    <h3>Backend Architecture</h3>
+    <div class="component-details">
+      <h4>Flask Server (app.py)</h4>
+      <p>
+        Built with Flask, providing REST API endpoints for frontend communication.
+      </p>
+      <div class="code-example">
+        <pre><code>
+# Key components in app.py
+- REST API endpoints for session management
+- Authentication middleware
+- Error handling
+        </code></pre>
+      </div>
+
+      <h4>Human Authentication Engine (human_auth.py)</h4>
+      <p>
+        Core authentication logic using MediaPipe for face and hand landmark detection.
+      </p>
+      <div class="code-example">
+        <pre><code>
+# Key components in human_auth.py
+- Face landmark detection
+- Hand gesture recognition
+- Challenge generation
+- Anti-spoofing: micro-movements, blink patterns, 3D checks
+        </code></pre>
+      </div>
+
+      <div class="tech-details">
+        <div class="tech-item">
+          <h5>Face Landmark Detection</h5>
+          <p>
+            Tracks 468 3D points to analyze expressions, head pose, and micro-movements.
+          </p>
+        </div>
+        <div class="tech-item">
+          <h5>Hand Landmark Detection</h5>
+          <p>
+            Tracks 21 points per hand for gesture recognition and challenge verification.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="architecture-section">
+    <h3>Frontend Architecture</h3>
+    <div class="component-details">
+      <h4>Angular Application</h4>
+      <p>
+        Built with Angular, providing a responsive interface for the authentication process.
+      </p>
+
+      <div class="tech-details">
+        <div class="tech-item">
+          <h5>Auth Page Component</h5>
+          <p>
+            Handles UI for authentication, including camera preview and challenge display.
+          </p>
+        </div>
+        <div class="tech-item">
+          <h5>Camera Service</h5>
+          <p>
+            Manages camera access and frame capture.
+          </p>
+          <div class="code-example">
+            <pre><code>
+// Key methods
+- start(): Initializes camera
+- capture(): Captures frames
+            </code></pre>
+          </div>
+        </div>
+        <div class="tech-item">
+          <h5>Auth Service</h5>
+          <p>
+            Handles API communication and session management.
+          </p>
+          <div class="code-example">
+            <pre><code>
+// Key methods
+- initialize(): Fetches config
+- startAuth(): Creates session
+- processFrame(): Sends frames
+            </code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="architecture-section">
+    <h3>API Communication</h3>
+    <div class="component-details">
+      <h4>REST API Endpoints</h4>
+      <div class="api-endpoints">
+        <div class="endpoint">
+          <h5>GET /api/config</h5>
+          <p>Returns API configuration</p>
+        </div>
+        <div class="endpoint">
+          <h5>POST /api/sessions</h5>
+          <p>Creates a new authentication session</p>
+        </div>
+        <div class="endpoint">
+          <h5>POST /api/sessions/&#123;session_id&#125;/process</h5>
+          <p>Processes a frame and returns results</p>
+        </div>
+        <div class="endpoint">
+          <h5>POST /api/sessions/&#123;session_id&#125;/reset</h5>
+          <p>Resets the current session</p>
+        </div>
+        <div class="endpoint">
+          <h5>POST /api/verify</h5>
+          <p>One-time frame verification</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="architecture-section">
+    <h3>Authentication Flow</h3>
+
+    <div class="flow-diagram-container">
+      <div class="flow-column demo">
+        <h4>Demo Page Flow</h4>
+        <div class="flow-diagram">
+          <div class="flow-step">
+            <div class="flow-number">1</div>
+            <div class="flow-content">
+              <h5>Initialize</h5>
+              <p>Load and initialize AuthService</p>
+              <div class="flow-detail">
+                <code>auth.initialize(backendUrl)</code>
+              </div>
+            </div>
+          </div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">
+            <div class="flow-number">2</div>
+            <div class="flow-content">
+              <h5>Start Camera</h5>
+              <p>Begin authentication process</p>
+              <div class="flow-detail">
+                <code>cam.start(videoElement)</code>
+              </div>
+            </div>
+          </div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">
+            <div class="flow-number">3</div>
+            <div class="flow-content">
+              <h5>Create Session</h5>
+              <p>Start authentication session</p>
+              <div class="flow-detail">
+                <code>auth.startAuth()</code>
+              </div>
+            </div>
+          </div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">
+            <div class="flow-number">4</div>
+            <div class="flow-content">
+              <h5>Process Frames</h5>
+              <p>Send frames for processing</p>
+              <div class="flow-detail">
+                <code>auth.processFrame(frame)</code>
+              </div>
+            </div>
+          </div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">
+            <div class="flow-number">5</div>
+            <div class="flow-content">
+              <h5>Complete Auth</h5>
+              <p>Verify human presence</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="backend-flow">
+      <h4>Backend Process</h4>
+      <div class="backend-flow-diagram">
+        <div class="backend-step">
+          <div class="backend-content">
+            <h5>Session Management</h5>
+            <ul>
+              <li>Generate session IDs</li>
+              <li>Initialize HumanAuth</li>
+            </ul>
+          </div>
+        </div>
+        <div class="backend-arrow">→</div>
+        <div class="backend-step">
+          <div class="backend-content">
+            <h5>Frame Processing</h5>
+            <ul>
+              <li>Decode image data</li>
+              <li>Optimize for processing</li>
+            </ul>
+          </div>
+        </div>
+        <div class="backend-arrow">→</div>
+        <div class="backend-step">
+          <div class="backend-content">
+            <h5>Detection</h5>
+            <ul>
+              <li>Face landmarks</li>
+              <li>Hand landmarks</li>
+            </ul>
+          </div>
+        </div>
+        <div class="backend-arrow">→</div>
+        <div class="backend-step">
+          <div class="backend-content">
+            <h5>Challenges</h5>
+            <ul>
+              <li>Generate challenges</li>
+              <li>Verify responses</li>
+            </ul>
+          </div>
+        </div>
+        <div class="backend-arrow">→</div>
+        <div class="backend-step">
+          <div class="backend-content">
+            <h5>Verification</h5>
+            <ul>
+              <li>Apply anti-spoofing</li>
+              <li>Return result</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p>
+      The client initializes a session, captures camera frames, and sends them to the backend.
+      The backend analyzes these frames using MediaPipe, issues challenges, and verifies responses.
+      After completing all challenges, the system confirms human presence and returns an authentication result.
+    </p>
+  </div>
+
+  <div class="architecture-section">
+    <h3>Vendor Integration</h3>
+
+    <div class="integration-overview">
+      <p>
+        Easily integrate HumanAuth into your existing authentication systems.
+      </p>
+
+      <div class="vendor-integration-link">
+        <a routerLink="/vendor-integration" class="view-integration-guide">
+          View Integration Guide →
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="architecture-section">
+    <h3>Security Considerations</h3>
+
+    <div class="security-diagram">
+      <h4>Anti-Spoofing Defense Layers</h4>
+      <div class="security-layers">
+        <div class="security-layer physical">
+          <div class="security-layer-content">
+            <h5>Physical Presence</h5>
+            <ul>
+              <li>Micro-movement detection</li>
+              <li>Blink pattern analysis</li>
+              <li>Texture analysis</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="security-layer spatial">
+          <div class="security-layer-content">
+            <h5>3D Spatial Analysis</h5>
+            <ul>
+              <li>3D consistency checks</li>
+              <li>Depth verification</li>
+              <li>Head pose estimation</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="security-layer interactive">
+          <div class="security-layer-content">
+            <h5>Interactive Challenges</h5>
+            <ul>
+              <li>Random challenge sequences</li>
+              <li>Unpredictable timing</li>
+              <li>Multi-modal verification</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="security-layer api">
+          <div class="security-layer-content">
+            <h5>API Security</h5>
+            <ul>
+              <li>API key authentication</li>
+              <li>Rate limiting</li>
+              <li>Session validation</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="attack-defense-matrix">
+      <h4>Attack Vector Defense</h4>
+      <div class="matrix-container">
+        <table class="defense-matrix">
+          <thead>
+            <tr>
+              <th>Attack</th>
+              <th>Defense</th>
+              <th>Effectiveness</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Static Photo</td>
+              <td>Movement detection, challenges</td>
+              <td class="effectiveness high">High</td>
+            </tr>
+            <tr>
+              <td>Recorded Video</td>
+              <td>Interactive challenges, 3D checks</td>
+              <td class="effectiveness high">High</td>
+            </tr>
+            <tr>
+              <td>Deepfake/GAN</td>
+              <td>Multi-modal verification</td>
+              <td class="effectiveness medium">Medium-High</td>
+            </tr>
+            <tr>
+              <td>3D Mask</td>
+              <td>Texture analysis, hand verification</td>
+              <td class="effectiveness medium">Medium-High</td>
+            </tr>
+            <tr>
+              <td>API Abuse</td>
+              <td>Rate limiting, authentication</td>
+              <td class="effectiveness high">High</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="privacy-security-split">
+      <div class="privacy-section">
+        <h4>Privacy Protections</h4>
+        <div class="privacy-features">
+          <div class="privacy-feature">
+            <div class="privacy-content">
+              <h5>Temporary Processing</h5>
+              <p>Real-time processing with no long-term storage</p>
+            </div>
+          </div>
+
+          <div class="privacy-feature">
+            <div class="privacy-content">
+              <h5>Server-Side Security</h5>
+              <p>Sensitive processing on secure servers</p>
+            </div>
+          </div>
+
+          <div class="privacy-feature">
+            <div class="privacy-content">
+              <h5>Anonymous Auth</h5>
+              <p>No personal identification required</p>
+            </div>
+          </div>
+
+          <div class="privacy-feature">
+            <div class="privacy-content">
+              <h5>Session Isolation</h5>
+              <p>Data deleted after session completion</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

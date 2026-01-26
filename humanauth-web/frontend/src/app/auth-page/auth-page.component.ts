@@ -1,5 +1,6 @@
 import { Component, ElementRef, ViewChild, OnDestroy, NgZone } from "@angular/core";
 import { CommonModule } from "@angular/common";
+import { HttpClientModule } from "@angular/common/http";
 import { CameraService } from "../services/camera.service";
 import { AuthService, AuthResult } from "../services/auth.service";
 
@@ -42,7 +43,7 @@ const HAND_CONNECTIONS = [
 @Component({
   selector: "app-auth-page",
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, HttpClientModule],
   templateUrl: "./auth-page.component.html",
   styleUrls: ["./auth-page.component.scss"],
 })
@@ -59,6 +60,12 @@ export class AuthPageComponent implements OnDestroy {
   private captureCanvas: HTMLCanvasElement;
   // Animation frame ID for cancellation
   private animationFrameId?: number;
+  // Frame rate control
+  private lastFrameTime = 0;
+  private targetFrameInterval = 1000 / 10; // Target 10 fps for processing
+  // Async processing control
+  private processingFrame = false;
+  private pendingFrame = false;
 
   constructor(
     private cam: CameraService,
@@ -75,8 +82,13 @@ export class AuthPageComponent implements OnDestroy {
     // Reset any previous UI state
     this.error = undefined;
     try {
+      // Start the camera
       await this.cam.start(this.video.nativeElement);
-      await this.auth.connect(this.backendUrl);
+
+      // Initialize the auth service with the backend URL
+      await this.auth.initialize(this.backendUrl);
+
+      // Start a new authentication session
       await this.auth.startAuth();
 
       // Initialize the visualization canvas dimensions once
@@ -125,21 +137,38 @@ export class AuthPageComponent implements OnDestroy {
     // If not running, don't schedule another frame
     if (!this.running) return;
 
+    // Frame rate limiting
+    const now = performance.now();
+    const elapsed = now - this.lastFrameTime;
+
+    if (elapsed < this.targetFrameInterval) {
+      // Not enough time has passed, schedule next check
+      this.animationFrameId = requestAnimationFrame(() => this.loop());
+      return;
+    }
+
+    // Update last frame time
+    this.lastFrameTime = now;
+
     try {
-      // Capture frame using the hidden canvas
+      // Capture frame using the hidden canvas with lower quality for better performance
       const frame = this.cam.capture(
         this.video.nativeElement,
         this.captureCanvas,
-        0.7 // Balance between quality and performance
+        0.5 // Lower quality for better performance
       );
 
-      const result = await this.auth.processFrame(frame);
-      this.zone.run(() => {
-        this.result = result;
-      });
+      // Asynchronous frame processing
+      if (!this.processingFrame) {
+        // No frame is being processed, start processing this one
+        this.processingFrame = true;
 
-      // Draw visual indicators based on the result
-      this.drawVisualIndicators(result);
+        // Process frame asynchronously
+        this.processFrameAsync(frame);
+      } else {
+        // A frame is already being processed, mark that we have a pending frame
+        this.pendingFrame = true;
+      }
     } catch (e: any) {
       // On any processing error, surface the message and stop the session.
       // This ensures the system does not continue or auto-restart; user must press Start.
@@ -162,6 +191,66 @@ export class AuthPageComponent implements OnDestroy {
     this.animationFrameId = requestAnimationFrame(() => this.loop());
   }
 
+  // Process a frame asynchronously
+  private async processFrameAsync(frame: string) {
+    try {
+      const result = await this.auth.processFrame(frame);
+
+      this.zone.run(() => {
+        this.result = result;
+
+        // Enhanced debug logging for challenge display
+        if (result.details) {
+          console.log(`Challenge display: current=${result.details['current_challenge']}, ` +
+                      `completed=${result.details['challenge_completed']}, ` +
+                      `count=${result.details['successful_challenges_count']}/${result.details['required_challenges']}`);
+
+          // Log the entire result object to inspect its structure
+          console.log('Full result object:', JSON.stringify(result));
+
+          // Specifically check the current_challenge property
+          console.log('Current challenge exists:', result.details.hasOwnProperty('current_challenge'));
+          console.log('Current challenge value:', result.details['current_challenge']);
+          console.log('Current challenge type:', typeof result.details['current_challenge']);
+        }
+
+        // Draw visual indicators based on the result
+        this.drawVisualIndicators(result);
+      });
+    } catch (e: any) {
+      this.zone.run(() => {
+        this.error = e?.message || String(e);
+        this.running = false;
+      });
+      // Clean up resources on error
+      try { this.cam.stop(); } catch { /* noop */ }
+      try { this.auth.disconnect(); } catch { /* noop */ }
+      if (this.animationFrameId) {
+        cancelAnimationFrame(this.animationFrameId);
+        this.animationFrameId = undefined;
+      }
+    } finally {
+      // Mark that we're done processing
+      this.processingFrame = false;
+
+      // If there's a pending frame, process it now
+      if (this.pendingFrame && this.running) {
+        this.pendingFrame = false;
+
+        // Capture a fresh frame instead of using an old one
+        const freshFrame = this.cam.capture(
+          this.video.nativeElement,
+          this.captureCanvas,
+          0.5
+        );
+
+        // Process the fresh frame
+        this.processingFrame = true;
+        this.processFrameAsync(freshFrame);
+      }
+    }
+  }
+
   drawVisualIndicators(result: AuthResult) {
     if (!result || !result.details) return;
 
@@ -180,10 +269,10 @@ export class AuthPageComponent implements OnDestroy {
     // Draw landmarks using a flipped drawing transform so they align with the mirrored video
     ctx.save();
     ctx.setTransform(-1, 0, 0, 1, canvas.width, 0);
-    if (result.details['face_landmarks']) {
+    if (result.details?.['face_landmarks']) {
       this.drawFaceLandmarks(ctx, result.details['face_landmarks']);
     }
-    if (result.details['hand_landmarks'] && result.details['hand_detected']) {
+    if (result.details?.['hand_landmarks'] && result.details?.['hand_detected']) {
       this.drawHandLandmarks(ctx, result.details['hand_landmarks']);
     }
     ctx.restore();
@@ -216,8 +305,8 @@ export class AuthPageComponent implements OnDestroy {
     ctx.restore();
 
     // Compute challenge progress values early so we can show authorised overlay
-    const completedChallenges = result.details['successful_challenges_count'] || 0;
-    const requiredChallenges = result.details['required_challenges'] || 3;
+    const completedChallenges = result.details?.['successful_challenges_count'] || 0;
+    const requiredChallenges = result.details?.['required_challenges'] || 3;
 
     // If all challenges complete, show an authorized screen overlay and stop drawing other UI
     if (completedChallenges >= requiredChallenges) {
@@ -256,7 +345,7 @@ export class AuthPageComponent implements OnDestroy {
     }
 
     // Draw challenge information if available
-    if (result.details['current_challenge']) {
+    if (result.details?.['current_challenge']) {
       // Draw challenge panel (more opaque)
       const panelTop = 50;
       const panelWidth = canvas.width / 2 - 20;
@@ -279,9 +368,12 @@ export class AuthPageComponent implements OnDestroy {
 
       // Draw challenge name
       ctx.font = '18px Arial';
-      ctx.fillStyle = result.details['challenge_completed'] ? 'green' : 'orange';
+      ctx.fillStyle = result.details?.['challenge_completed'] ? 'green' : 'orange';
+
+      // Safely format the challenge name with null check
+      const challengeName = result.details?.['current_challenge'] || '';
       ctx.fillText(
-        result.details['current_challenge'].replace(/_/g, ' '),
+        challengeName.replace(/_/g, ' '),
         20,
         panelTop + 50
       );

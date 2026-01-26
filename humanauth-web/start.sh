@@ -69,15 +69,31 @@ cleanup() {
 trap cleanup SIGINT SIGTERM EXIT
 
 # ---------- Backend Setup ----------
+# Create virtual environment if it doesn't exist
 if [[ ! -d "$BACKEND_DIR/venv" ]]; then
   echo "Setting up Python virtual environment for backend..."
   cd "$BACKEND_DIR" || exit 1
   python3 -m venv venv
-  source venv/bin/activate
-  pip install -r requirements.txt
-  deactivate
-  echo "Backend dependencies installed."
+  echo "Virtual environment created."
 fi
+
+# Always install/update dependencies to ensure all required packages are available
+echo "Installing/updating backend dependencies..."
+cd "$BACKEND_DIR" || exit 1
+source venv/bin/activate
+pip install -r requirements.txt
+deactivate
+echo "Backend dependencies installed."
+
+# ---------- API Configuration ----------
+# Generate a random API key if not provided
+if [[ -z "${API_KEY:-}" ]]; then
+  # Generate a random API key (32 characters)
+  API_KEY=$(openssl rand -hex 16)
+  echo "Generated API key for development: $API_KEY"
+  echo "For production, set a secure API_KEY environment variable."
+fi
+export API_KEY
 
 # ---------- Start Backend ----------
 echo "Starting backend server..."

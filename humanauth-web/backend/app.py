@@ -2,7 +2,7 @@
 """
 HumanAuth Web Demo - Backend Server (app.py)
 
-Flask + Socket.IO backend that:
+Flask REST API backend that:
 - Starts auth sessions
 - Accepts webcam frames as base64 (data URL or raw base64)
 - Runs HumanAuth.update(frame)
@@ -23,12 +23,14 @@ import logging
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, Any, Optional, Tuple
+from functools import wraps
 
 import cv2
 import numpy as np
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, g
 from flask_cors import CORS
-from flask_socketio import SocketIO, emit
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 # ------------------------------------------------------------------------------
 # Logging
@@ -61,10 +63,51 @@ except Exception as e:
 # ------------------------------------------------------------------------------
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "humanauth-web-demo-secret-key")
-CORS(app)
 
-# Threading mode is the least painful in dev. If you install eventlet/gevent, you can change this.
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
+# CORS setup - configurable to allow external sites
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:4200")
+# Get allowed origins from environment variable, defaulting to frontend URL
+# Format: comma-separated list of allowed origins, e.g. "http://example.com,https://app.example.com"
+ALLOWED_ORIGINS = os.environ.get("ALLOWED_ORIGINS", FRONTEND_URL)
+allowed_origins = [origin.strip() for origin in ALLOWED_ORIGINS.split(",")]
+
+# In production, only allow specific origins
+if os.environ.get("FLASK_ENV") == "production":
+    logger.info(f"CORS: Allowing specific origins: {allowed_origins}")
+    CORS(app, resources={
+        r"/api/*": {"origins": allowed_origins, "supports_credentials": False}
+    })
+else:
+    # In development, allow all origins for easier testing
+    logger.info("CORS: Development mode - allowing all origins")
+    CORS(app)
+
+# API key authentication
+API_KEY = os.environ.get("API_KEY", "dev-api-key-change-me-in-production")
+
+# Rate limiting setup
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["200 per day", "50 per hour"],
+    storage_uri="memory://",
+)
+
+# ------------------------------------------------------------------------------
+# Authentication & Authorization
+# ------------------------------------------------------------------------------
+def require_api_key(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        provided_key = request.headers.get("X-API-Key")
+        if provided_key and provided_key == API_KEY:
+            return f(*args, **kwargs)
+        return jsonify({
+            "status": "error",
+            "code": 401,
+            "message": "Unauthorized. Valid API key required."
+        }), 401
+    return decorated_function
 
 # Active sessions
 auth_sessions: Dict[str, HumanAuth] = {}
@@ -128,6 +171,15 @@ def decode_frame(frame_data: str) -> Optional[np.ndarray]:
 
     arr = np.frombuffer(img_bytes, np.uint8)
     frame = cv2.imdecode(arr, cv2.IMREAD_COLOR)
+    
+    # Downsample large images for better performance
+    # Only resize if the image is larger than 640x480
+    if frame is not None and (frame.shape[1] > 640 or frame.shape[0] > 480):
+        scale_factor = min(640 / frame.shape[1], 480 / frame.shape[0])
+        new_width = int(frame.shape[1] * scale_factor)
+        new_height = int(frame.shape[0] * scale_factor)
+        frame = cv2.resize(frame, (new_width, new_height), interpolation=cv2.INTER_AREA)
+    
     return frame
 
 
@@ -143,6 +195,40 @@ def models_exist() -> Dict[str, Any]:
 
 
 # ------------------------------------------------------------------------------
+# Helper Functions for API
+# ------------------------------------------------------------------------------
+def error_response(message, code=400, details=None):
+    """Generate a standardized error response"""
+    response = {
+        "status": "error",
+        "code": code,
+        "message": message
+    }
+    if details:
+        response["details"] = details
+    return jsonify(response), code
+
+def success_response(data):
+    """Generate a standardized success response"""
+    return jsonify({
+        "status": "success",
+        "data": data
+    })
+
+def validate_request_json(required_fields=None):
+    """Validate that the request has JSON data and required fields"""
+    if not request.is_json:
+        return error_response("Request must be JSON", 400)
+    
+    data = request.get_json()
+    if required_fields:
+        missing = [field for field in required_fields if field not in data]
+        if missing:
+            return error_response(f"Missing required fields: {', '.join(missing)}", 400)
+    
+    return None
+
+# ------------------------------------------------------------------------------
 # Routes
 # ------------------------------------------------------------------------------
 @app.route("/", methods=["GET"])
@@ -154,11 +240,14 @@ def index():
             "version": "1.0.0",
             "description": "Backend API for the HumanAuth Web Demo",
             "endpoints": {
-                "health": "/api/health",
-                "auth": {
-                    "start": "/api/auth/start",
-                    "reset": "/api/auth/reset",
-                    "process": "/api/auth/process",
+                "v1": "/api/v1",
+                "legacy": {
+                    "health": "/api/health",
+                    "auth": {
+                        "start": "/api/auth/start",
+                        "reset": "/api/auth/reset",
+                        "process": "/api/auth/process",
+                    },
                 },
             },
             "frontend_url": frontend_url,
@@ -185,6 +274,151 @@ def health_check():
             },
         }
     )
+
+@app.route("/api/config", methods=["GET"])
+def get_frontend_config():
+    """
+    Provides configuration for the frontend, including a development API key.
+    In production, this should be restricted or removed.
+    """
+    # For development only - in production, API keys should be managed securely
+    # and not exposed directly to the frontend
+    return jsonify({
+        "apiKey": API_KEY,
+        "apiUrl": request.url_root + "api/v1"
+    })
+
+# ------------------------------------------------------------------------------
+# API v1 Routes
+# ------------------------------------------------------------------------------
+@app.route("/api/v1/health", methods=["GET"])
+@require_api_key
+@limiter.limit("60 per minute")
+def api_v1_health():
+    """Health check endpoint for API v1"""
+    mx = models_exist()
+    return success_response({
+        "timestamp": datetime.now().isoformat(),
+        "models": {"face": bool(mx["face"]), "hand": bool(mx["hand"])}
+    })
+
+@app.route("/api/v1/verify", methods=["POST"])
+@require_api_key
+@limiter.limit("30 per minute")
+def api_v1_verify():
+    """Verify if the provided image contains a human"""
+    # Validate request
+    error = validate_request_json(["image"])
+    if error:
+        return error
+    
+    data = request.get_json()
+    image_data = data.get("image")
+    
+    # Decode the image
+    frame = decode_frame(image_data)
+    if frame is None:
+        return error_response("Invalid image data. Expected base64 encoded image.", 400)
+    
+    try:
+        # Create a temporary HumanAuth instance for this verification
+        auth = HumanAuth(FACE_MODEL_PATH, HAND_MODEL_PATH)
+        result = auth.update(frame)
+        
+        # Return the result
+        return success_response({
+            "verified": bool(result.authenticated),
+            "confidence": float(result.confidence),
+            "message": result.message,
+            "details": {
+                k: (float(v) if isinstance(v, (int, float, np.number)) else v)
+                for k, v in (result.details or {}).items()
+            }
+        })
+    except Exception as e:
+        logger.exception("Error in verify endpoint")
+        return error_response(f"Verification failed: {str(e)}", 500)
+
+@app.route("/api/v1/sessions", methods=["POST"])
+@require_api_key
+@limiter.limit("60 per minute")
+def api_v1_create_session():
+    """Start a new verification session"""
+    session_id = f"session_{uuid.uuid4().hex}"
+    
+    mx = models_exist()
+    if not (mx["face"] or mx["hand"]):
+        return error_response(
+            "Model files not found. Put face_landmarker.task and hand_landmarker.task in backend/, "
+            "or set FACE_MODEL_PATH / HAND_MODEL_PATH env vars.",
+            500,
+            mx
+        )
+    
+    try:
+        auth_sessions[session_id] = HumanAuth(FACE_MODEL_PATH, HAND_MODEL_PATH)
+        return success_response({
+            "session_id": session_id,
+            "message": "Authentication session started"
+        })
+    except Exception as e:
+        logger.exception("Error starting authentication session")
+        return error_response(f"Failed to start authentication session: {str(e)}", 500)
+
+@app.route("/api/v1/sessions/<session_id>/reset", methods=["POST"])
+@require_api_key
+@limiter.limit("60 per minute")
+def api_v1_reset_session(session_id):
+    """Reset an existing verification session"""
+    if not session_id or session_id not in auth_sessions:
+        return error_response("Invalid session ID", 400)
+    
+    try:
+        auth_sessions[session_id] = HumanAuth(FACE_MODEL_PATH, HAND_MODEL_PATH)
+        return success_response({
+            "message": "Authentication session reset"
+        })
+    except Exception as e:
+        logger.exception("Error resetting authentication session")
+        return error_response(f"Failed to reset authentication session: {str(e)}", 500)
+
+@app.route("/api/v1/sessions/<session_id>/process", methods=["POST"])
+@require_api_key
+@limiter.limit("120 per minute")
+def api_v1_process_frame(session_id):
+    """Process a frame in an existing session"""
+    if not session_id or session_id not in auth_sessions:
+        return error_response("Invalid session ID", 400)
+    
+    # Validate request
+    error = validate_request_json(["frame"])
+    if error:
+        return error
+    
+    data = request.get_json()
+    frame_data = data.get("frame")
+    
+    frame = decode_frame(frame_data)
+    if frame is None:
+        return error_response("Frame decode failed (bad base64 or invalid image).", 400)
+    
+    try:
+        auth = auth_sessions[session_id]
+        result = auth.update(frame)
+        
+        result_dict = {
+            "authenticated": bool(result.authenticated),
+            "confidence": float(result.confidence),
+            "message": result.message,
+            "details": {
+                k: (float(v) if isinstance(v, (int, float, np.number)) else v)
+                for k, v in (result.details or {}).items()
+            }
+        }
+        return success_response(result_dict)
+    except Exception as e:
+        logger.exception("Error processing frame")
+        return error_response(f"Failed to process frame: {str(e)}", 500)
 
 
 @app.route("/api/auth/start", methods=["POST"])
@@ -265,98 +499,8 @@ def process_frame():
 
 
 # ------------------------------------------------------------------------------
-# Socket.IO events
-# ------------------------------------------------------------------------------
-@socketio.on("connect")
-def handle_connect():
-    logger.info(f"Client connected: {request.sid}")
-    emit("connected", {"status": "connected"})
-
-
-@socketio.on("disconnect")
-def handle_disconnect():
-    logger.info(f"Client disconnected: {request.sid}")
-
-
-@socketio.on("start_auth")
-def handle_start_auth():
-    session_id = f"session_{uuid.uuid4().hex}"
-
-    mx = models_exist()
-    if not (mx["face"] or mx["hand"]):
-        emit(
-            "auth_started",
-            {
-                "status": "error",
-                "message": "Model files not found. Put .task files in backend/ or set env vars.",
-                "debug": mx,
-            },
-        )
-        return
-
-    try:
-        auth_sessions[session_id] = HumanAuth(FACE_MODEL_PATH, HAND_MODEL_PATH)
-        emit("auth_started", {"status": "success", "session_id": session_id, "message": "Authentication session started"})
-    except Exception as e:
-        logger.exception("Error starting authentication session (socket)")
-        emit("auth_started", {"status": "error", "message": f"Failed to start authentication session: {str(e)}"})
-
-
-@socketio.on("reset_auth")
-def handle_reset_auth(data):
-    session_id = (data or {}).get("session_id")
-    if not session_id or session_id not in auth_sessions:
-        emit("auth_reset", {"status": "error", "message": "Invalid session ID"})
-        return
-
-    try:
-        auth_sessions[session_id] = HumanAuth(FACE_MODEL_PATH, HAND_MODEL_PATH)
-        emit("auth_reset", {"status": "success", "message": "Authentication session reset"})
-    except Exception as e:
-        logger.exception("Error resetting authentication session (socket)")
-        emit("auth_reset", {"status": "error", "message": f"Failed to reset authentication session: {str(e)}"})
-
-
-@socketio.on("process_frame")
-def handle_process_frame(data):
-    session_id = (data or {}).get("session_id")
-    frame_data = (data or {}).get("frame")
-
-    if not session_id or session_id not in auth_sessions:
-        emit("frame_processed", {"status": "error", "message": "Invalid session ID"})
-        return
-
-    if not frame_data:
-        emit("frame_processed", {"status": "error", "message": "No frame data provided"})
-        return
-
-    frame = decode_frame(frame_data)
-    if frame is None:
-        emit("frame_processed", {"status": "error", "message": "Frame decode failed (bad base64 or invalid image)."})
-        return
-
-    try:
-        auth = auth_sessions[session_id]
-        result = auth.update(frame)
-
-        result_dict = {
-            "authenticated": bool(result.authenticated),
-            "confidence": float(result.confidence),
-            "message": result.message,
-            "details": {
-                k: (float(v) if isinstance(v, (int, float, np.number)) else v)
-                for k, v in (result.details or {}).items()
-            },
-        }
-        emit("frame_processed", {"status": "success", "result": result_dict})
-    except Exception as e:
-        logger.exception("Error processing frame (socket)")
-        emit("frame_processed", {"status": "error", "message": f"Failed to process frame: {str(e)}"})
-
-
-# ------------------------------------------------------------------------------
 # Main
 # ------------------------------------------------------------------------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
-    socketio.run(app, host="0.0.0.0", port=port, debug=True, allow_unsafe_werkzeug=True)
+    app.run(host="0.0.0.0", port=port, debug=True)

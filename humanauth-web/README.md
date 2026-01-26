@@ -12,7 +12,8 @@ HumanAuth Web Demo is a complete web application that demonstrates human authent
 - Interactive challenge-response authentication
 - Visual feedback with face and hand mesh visualization
 - Progress tracking for authentication challenges
-- WebSocket communication for low-latency processing
+- REST API for integration with external applications
+- API key authentication for secure access
 
 ## Requirements
 
@@ -103,10 +104,25 @@ If the frontend can't connect to the backend:
 ## How It Works
 
 1. The frontend captures frames from your webcam
-2. Frames are sent to the backend via WebSocket
+2. Frames are sent to the backend via REST API
 3. The backend processes frames using MediaPipe for face and hand detection
 4. Authentication results are sent back to the frontend
 5. The frontend visualizes the results and displays authentication status
+
+## Architecture
+
+The application is structured with a clean separation of concerns:
+
+1. **Backend**:
+   - `app.py`: Main Flask application with REST API endpoints
+   - `human_auth.py`: Core authentication logic using MediaPipe
+   - `auth_types.py`: Shared data types (AuthResult) to avoid circular dependencies
+   - `visualization.py`: Visualization utilities for debugging
+
+2. **Frontend**:
+   - Angular-based SPA with TypeScript
+   - Components for authentication UI and visualization
+   - Services for camera access and backend communication
 
 ## Performance and Display Settings
 
