@@ -78,75 +78,80 @@
 
     <div class="integration-flow">
       <h3>Integration Flow Diagram</h3>
-      <div class="flow-diagram">
-        <div class="flow-step">
-          <div class="flow-number">1</div>
-          <div class="flow-content">
-            <h5>API Configuration</h5>
-            <p>Vendor application configures API client</p>
-            <div class="flow-detail">
-              <code>apiClient.setConfig(&#123; apiKey, apiUrl &#125;)</code>
-              <span>Sets API key and endpoint URL</span>
+      <div class="diagram-container">
+        <div class="diagram-grid">
+          <!-- Row 1: First three steps -->
+          <div class="diagram-node">
+            <div class="node-number">1</div>
+            <div class="node-content">
+              <h5>API Configuration</h5>
+              <p>Vendor application configures API client</p>
+              <div class="node-code">
+                <code>apiClient.setConfig(&#123; apiKey, apiUrl &#125;)</code>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="flow-arrow">↓</div>
-        <div class="flow-step">
-          <div class="flow-number">2</div>
-          <div class="flow-content">
-            <h5>Custom UI Setup</h5>
-            <p>Vendor application initializes camera and UI</p>
-            <div class="flow-detail">
-              <code>setupCameraAccess()</code>
-              <span>Implements camera access using preferred method</span>
+          <div class="diagram-connector horizontal"></div>
+          <div class="diagram-node">
+            <div class="node-number">2</div>
+            <div class="node-content">
+              <h5>Custom UI Setup</h5>
+              <p>Vendor application initializes camera and UI</p>
+              <div class="node-code">
+                <code>setupCameraAccess()</code>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="flow-arrow">↓</div>
-        <div class="flow-step">
-          <div class="flow-number">3</div>
-          <div class="flow-content">
-            <h5>Create Session</h5>
-            <p>Vendor application creates authentication session</p>
-            <div class="flow-detail">
-              <code>POST /api/v1/sessions</code>
-              <span>Headers: &#123; "X-API-Key": "vendor-api-key" &#125;</span>
+          <div class="diagram-connector horizontal"></div>
+          <div class="diagram-node">
+            <div class="node-number">3</div>
+            <div class="node-content">
+              <h5>Create Session</h5>
+              <p>Vendor application creates authentication session</p>
+              <div class="node-code">
+                <code>POST /api/v1/sessions</code>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="flow-arrow">↓</div>
-        <div class="flow-step">
-          <div class="flow-number">4</div>
-          <div class="flow-content">
-            <h5>Process Frames</h5>
-            <p>Vendor application sends frames for processing</p>
-            <div class="flow-detail">
-              <code>POST /api/v1/sessions/:session_id/process</code>
-              <span>Body: &#123; "frame": "base64-encoded-image" &#125;</span>
+
+          <!-- Row 2: Vertical connectors -->
+          <div class="diagram-spacer"></div>
+          <div class="diagram-spacer"></div>
+          <div class="diagram-spacer"></div>
+          <div class="diagram-connector vertical"></div>
+          <div class="diagram-spacer"></div>
+
+          <!-- Row 3: Last three steps (in reverse order) -->
+          <div class="diagram-node">
+            <div class="node-number">6</div>
+            <div class="node-content">
+              <h5>Business Logic Integration</h5>
+              <p>Vendor application integrates with business systems</p>
+              <div class="node-code">
+                <code>if (result.authenticated) &#123; grantAccess() &#125;</code>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="flow-arrow">↓</div>
-        <div class="flow-step">
-          <div class="flow-number">5</div>
-          <div class="flow-content">
-            <h5>Custom Challenge Display</h5>
-            <p>Vendor application shows challenges in custom UI</p>
-            <div class="flow-detail">
-              <code>renderChallenge(result.details.current_challenge)</code>
-              <span>Displays challenge instructions in vendor's UI style</span>
+          <div class="diagram-connector horizontal"></div>
+          <div class="diagram-node">
+            <div class="node-number">5</div>
+            <div class="node-content">
+              <h5>Custom Challenge Display</h5>
+              <p>Vendor application shows challenges in custom UI</p>
+              <div class="node-code">
+                <code>renderChallenge(result.details.current_challenge)</code>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="flow-arrow">↓</div>
-        <div class="flow-step">
-          <div class="flow-number">6</div>
-          <div class="flow-content">
-            <h5>Business Logic Integration</h5>
-            <p>Vendor application integrates with business systems</p>
-            <div class="flow-detail">
-              <code>if (result.authenticated) &#123; grantAccess() &#125;</code>
-              <span>Triggers vendor-specific actions upon authentication</span>
+          <div class="diagram-connector horizontal"></div>
+          <div class="diagram-node">
+            <div class="node-number">4</div>
+            <div class="node-content">
+              <h5>Process Frames</h5>
+              <p>Vendor application sends frames for processing</p>
+              <div class="node-code">
+                <code>POST /api/v1/sessions/:session_id/process</code>
+              </div>
             </div>
           </div>
         </div>

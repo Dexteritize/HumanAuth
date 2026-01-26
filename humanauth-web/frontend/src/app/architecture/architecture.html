@@ -3,9 +3,8 @@
 
   <div class="architecture-intro">
     <p>
-      HumanAuth is a comprehensive human authentication system that uses face and hand recognition to verify
-      that a user is a real human rather than a bot or spoofing attempt. This page explains the architecture
-      of the system, from the internal backend components to the API and frontend.
+      HumanAuth uses face and hand recognition to verify real humans versus bots or spoofing attempts.
+      This page outlines the system architecture from backend components to API and frontend integration.
     </p>
   </div>
 
@@ -13,7 +12,6 @@
     <h3>System Overview</h3>
     <div class="architecture-diagram">
       <div class="diagram-container">
-        <!-- Enhanced architecture diagram representation -->
         <div class="diagram-row">
           <div class="diagram-column">
             <div class="diagram-label">Client Applications</div>
@@ -92,20 +90,19 @@
       <div class="integration-row">
         <div class="integration-box demo">
           <h5>Demo Page Integration</h5>
-          <p>The built-in demo page provides a complete reference implementation:</p>
+          <p>Reference implementation with:</p>
           <ul>
             <li>Camera access and frame capture</li>
-            <li>API communication via AuthService</li>
-            <li>Challenge display and visual feedback</li>
-            <li>Authentication status tracking</li>
+            <li>API communication</li>
+            <li>Challenge display and feedback</li>
           </ul>
         </div>
         <div class="integration-box vendor">
-          <h5>Vendor Authentication Integration</h5>
-          <p>External applications can integrate with HumanAuth via:</p>
+          <h5>Vendor Integration</h5>
+          <p>External applications connect via:</p>
           <ul>
-            <li>REST API with API key authentication</li>
-            <li>Cross-Origin Resource Sharing (CORS) support</li>
+            <li>REST API with API key auth</li>
+            <li>CORS support</li>
             <li>Standardized JSON responses</li>
           </ul>
         </div>
@@ -113,15 +110,9 @@
     </div>
 
     <p>
-      The HumanAuth system consists of multiple components working together to provide human authentication.
       The frontend captures camera frames and sends them to the backend via the API.
-      The backend processes these frames using MediaPipe to detect faces and hands, and verifies that the user
-      is a real human by issuing challenges and analyzing responses.
-    </p>
-    <p>
-      The system is designed to be flexible, allowing both the built-in demo page and external vendor applications
-      to integrate with the authentication engine. The demo page provides a complete reference implementation,
-      while the API endpoints enable custom integrations for various use cases.
+      The backend processes these frames using MediaPipe to detect faces and hands, verifying human presence
+      through interactive challenges.
     </p>
   </div>
 
@@ -130,54 +121,42 @@
     <div class="component-details">
       <h4>Flask Server (app.py)</h4>
       <p>
-        The backend is built with Flask, a lightweight Python web framework. It provides REST API endpoints
-        for the frontend to communicate with.
+        Built with Flask, providing REST API endpoints for frontend communication.
       </p>
       <div class="code-example">
         <pre><code>
 # Key components in app.py
-- REST API endpoints for session management and frame processing
-- Authentication middleware for API key validation
-- Error handling and response formatting
+- REST API endpoints for session management
+- Authentication middleware
+- Error handling
         </code></pre>
       </div>
 
       <h4>Human Authentication Engine (human_auth.py)</h4>
       <p>
-        The core of the backend is the HumanAuth class, which handles the authentication logic. It uses
-        MediaPipe to detect face and hand landmarks, and implements various anti-spoofing techniques.
+        Core authentication logic using MediaPipe for face and hand landmark detection.
       </p>
       <div class="code-example">
         <pre><code>
 # Key components in human_auth.py
-- Face landmark detection using MediaPipe
+- Face landmark detection
 - Hand gesture recognition
-- Challenge generation and verification
-- Anti-spoofing techniques:
-  - Micro-movement detection
-  - Blink pattern analysis
-  - 3D consistency checks
-  - Texture analysis
+- Challenge generation
+- Anti-spoofing: micro-movements, blink patterns, 3D checks
         </code></pre>
       </div>
 
-      <h4>MediaPipe Integration</h4>
-      <p>
-        HumanAuth uses MediaPipe, a cross-platform framework for building multimodal machine learning pipelines.
-        It leverages MediaPipe's face and hand landmark detection capabilities to track 468 distinct points on
-        the human face and 21 points on each hand in real-time.
-      </p>
       <div class="tech-details">
         <div class="tech-item">
           <h5>Face Landmark Detection</h5>
           <p>
-            Tracks 468 3D points on the face to analyze facial expressions, head pose, and natural micro-movements.
+            Tracks 468 3D points to analyze expressions, head pose, and micro-movements.
           </p>
         </div>
         <div class="tech-item">
           <h5>Hand Landmark Detection</h5>
           <p>
-            Tracks 21 points on each hand to recognize gestures and verify interactive challenges.
+            Tracks 21 points per hand for gesture recognition and challenge verification.
           </p>
         </div>
       </div>
@@ -189,45 +168,40 @@
     <div class="component-details">
       <h4>Angular Application</h4>
       <p>
-        The frontend is built with Angular, a platform and framework for building single-page client applications.
-        It provides a responsive user interface for the authentication process.
+        Built with Angular, providing a responsive interface for the authentication process.
       </p>
 
-      <h4>Key Components</h4>
       <div class="tech-details">
         <div class="tech-item">
           <h5>Auth Page Component</h5>
           <p>
-            Handles the user interface for the authentication process, including camera preview, challenge display,
-            and feedback.
+            Handles UI for authentication, including camera preview and challenge display.
           </p>
         </div>
         <div class="tech-item">
           <h5>Camera Service</h5>
           <p>
-            Manages camera access, frame capture, and processing before sending to the backend.
+            Manages camera access and frame capture.
           </p>
           <div class="code-example">
             <pre><code>
-// Key methods in camera.service.ts
-- start(): Initializes the camera stream
-- stop(): Stops the camera stream
-- capture(): Captures a frame from the video stream
+// Key methods
+- start(): Initializes camera
+- capture(): Captures frames
             </code></pre>
           </div>
         </div>
         <div class="tech-item">
           <h5>Auth Service</h5>
           <p>
-            Handles communication with the backend API, including session management and frame processing.
+            Handles API communication and session management.
           </p>
           <div class="code-example">
             <pre><code>
-// Key methods in auth.service.ts
-- initialize(): Fetches API configuration
-- startAuth(): Starts a new authentication session
-- processFrame(): Sends a frame to the backend for processing
-- resetAuth(): Resets the current authentication session
+// Key methods
+- initialize(): Fetches config
+- startAuth(): Creates session
+- processFrame(): Sends frames
             </code></pre>
           </div>
         </div>
@@ -239,29 +213,26 @@
     <h3>API Communication</h3>
     <div class="component-details">
       <h4>REST API Endpoints</h4>
-      <p>
-        The backend exposes several REST API endpoints for the frontend to communicate with:
-      </p>
       <div class="api-endpoints">
         <div class="endpoint">
           <h5>GET /api/config</h5>
-          <p>Returns API configuration, including the API key and URL.</p>
+          <p>Returns API configuration</p>
         </div>
         <div class="endpoint">
           <h5>POST /api/sessions</h5>
-          <p>Creates a new authentication session and returns a session ID.</p>
+          <p>Creates a new authentication session</p>
         </div>
         <div class="endpoint">
           <h5>POST /api/sessions/&#123;session_id&#125;/process</h5>
-          <p>Processes a frame in the current authentication session and returns the result.</p>
+          <p>Processes a frame and returns results</p>
         </div>
         <div class="endpoint">
           <h5>POST /api/sessions/&#123;session_id&#125;/reset</h5>
-          <p>Resets the current authentication session.</p>
+          <p>Resets the current session</p>
         </div>
         <div class="endpoint">
           <h5>POST /api/verify</h5>
-          <p>Verifies a single frame without maintaining a session.</p>
+          <p>One-time frame verification</p>
         </div>
       </div>
     </div>
@@ -278,10 +249,9 @@
             <div class="flow-number">1</div>
             <div class="flow-content">
               <h5>Initialize</h5>
-              <p>Demo page loads and initializes AuthService</p>
+              <p>Load and initialize AuthService</p>
               <div class="flow-detail">
-                <code>await auth.initialize(backendUrl)</code>
-                <span>Fetches API configuration and sets up connection</span>
+                <code>auth.initialize(backendUrl)</code>
               </div>
             </div>
           </div>
@@ -290,10 +260,9 @@
             <div class="flow-number">2</div>
             <div class="flow-content">
               <h5>Start Camera</h5>
-              <p>User clicks "Start" to begin authentication</p>
+              <p>Begin authentication process</p>
               <div class="flow-detail">
-                <code>await cam.start(videoElement)</code>
-                <span>Requests camera access and starts video stream</span>
+                <code>cam.start(videoElement)</code>
               </div>
             </div>
           </div>
@@ -302,10 +271,9 @@
             <div class="flow-number">3</div>
             <div class="flow-content">
               <h5>Create Session</h5>
-              <p>Demo page creates a new authentication session</p>
+              <p>Start authentication session</p>
               <div class="flow-detail">
-                <code>await auth.startAuth()</code>
-                <span>Calls POST /api/v1/sessions endpoint</span>
+                <code>auth.startAuth()</code>
               </div>
             </div>
           </div>
@@ -314,10 +282,9 @@
             <div class="flow-number">4</div>
             <div class="flow-content">
               <h5>Process Frames</h5>
-              <p>Demo page captures and sends frames for processing</p>
+              <p>Send frames for processing</p>
               <div class="flow-detail">
-                <code>await auth.processFrame(frame)</code>
-                <span>Calls POST /api/v1/sessions/:session_id/process endpoint</span>
+                <code>auth.processFrame(frame)</code>
               </div>
             </div>
           </div>
@@ -325,95 +292,63 @@
           <div class="flow-step">
             <div class="flow-number">5</div>
             <div class="flow-content">
-              <h5>Display Challenges</h5>
-              <p>Demo page shows challenges and visual feedback</p>
-              <div class="flow-detail">
-                <code>drawVisualIndicators(result)</code>
-                <span>Renders face/hand landmarks and challenge instructions</span>
-              </div>
-            </div>
-          </div>
-          <div class="flow-arrow">↓</div>
-          <div class="flow-step">
-            <div class="flow-number">6</div>
-            <div class="flow-content">
-              <h5>Complete Authentication</h5>
-              <p>Demo page shows success message when authenticated</p>
-              <div class="flow-detail">
-                <code>if (completedChallenges >= requiredChallenges)</code>
-                <span>Shows "AUTHORIZED HUMAN" message</span>
-              </div>
+              <h5>Complete Auth</h5>
+              <p>Verify human presence</p>
             </div>
           </div>
         </div>
       </div>
-
     </div>
 
     <div class="backend-flow">
-      <h4>Backend Authentication Process</h4>
+      <h4>Backend Process</h4>
       <div class="backend-flow-diagram">
         <div class="backend-step">
-          <div class="backend-icon session"></div>
           <div class="backend-content">
             <h5>Session Management</h5>
-            <p>Creates and tracks authentication sessions</p>
             <ul>
-              <li>Generates unique session IDs</li>
-              <li>Initializes HumanAuth instance for each session</li>
-              <li>Maintains session state</li>
+              <li>Generate session IDs</li>
+              <li>Initialize HumanAuth</li>
             </ul>
           </div>
         </div>
         <div class="backend-arrow">→</div>
         <div class="backend-step">
-          <div class="backend-icon frame"></div>
           <div class="backend-content">
             <h5>Frame Processing</h5>
-            <p>Processes incoming camera frames</p>
             <ul>
-              <li>Decodes base64 image data</li>
-              <li>Resizes frames for optimal processing</li>
-              <li>Passes frames to HumanAuth engine</li>
+              <li>Decode image data</li>
+              <li>Optimize for processing</li>
             </ul>
           </div>
         </div>
         <div class="backend-arrow">→</div>
         <div class="backend-step">
-          <div class="backend-icon detection"></div>
           <div class="backend-content">
-            <h5>Face & Hand Detection</h5>
-            <p>Uses MediaPipe to detect landmarks</p>
+            <h5>Detection</h5>
             <ul>
-              <li>Detects 468 face landmarks</li>
-              <li>Detects 21 hand landmarks</li>
-              <li>Analyzes landmark positions and movements</li>
+              <li>Face landmarks</li>
+              <li>Hand landmarks</li>
             </ul>
           </div>
         </div>
         <div class="backend-arrow">→</div>
         <div class="backend-step">
-          <div class="backend-icon challenge"></div>
           <div class="backend-content">
-            <h5>Challenge Management</h5>
-            <p>Issues and verifies challenges</p>
+            <h5>Challenges</h5>
             <ul>
-              <li>Generates random challenges (turn head, show hand)</li>
-              <li>Verifies user responses to challenges</li>
-              <li>Tracks challenge completion progress</li>
+              <li>Generate challenges</li>
+              <li>Verify responses</li>
             </ul>
           </div>
         </div>
         <div class="backend-arrow">→</div>
         <div class="backend-step">
-          <div class="backend-icon verify"></div>
           <div class="backend-content">
-            <h5>Authentication Verification</h5>
-            <p>Determines if user is human</p>
+            <h5>Verification</h5>
             <ul>
-              <li>Applies anti-spoofing techniques</li>
-              <li>Calculates confidence score</li>
-              <li>Returns authentication result</li>
+              <li>Apply anti-spoofing</li>
+              <li>Return result</li>
             </ul>
           </div>
         </div>
@@ -421,17 +356,9 @@
     </div>
 
     <p>
-      The authentication process involves coordination between the client application (either the demo page or a vendor integration)
-      and the backend server. The client initializes a session, captures camera frames, and sends them to the backend for processing.
-      The backend analyzes these frames using MediaPipe to detect face and hand landmarks, issues challenges, and verifies that
-      the user is responding correctly. After the user successfully completes all challenges, the backend confirms that the user
-      is a real human and returns an authentication result.
-    </p>
-
-    <p>
-      The demo page provides a complete reference implementation with built-in UI components for displaying challenges and visual feedback.
-      Vendor applications can integrate with the same backend API but implement their own UI and business logic to fit their specific needs.
-      Both integration paths follow the same core authentication flow but may differ in how they present challenges and handle the authentication result.
+      The client initializes a session, captures camera frames, and sends them to the backend.
+      The backend analyzes these frames using MediaPipe, issues challenges, and verifies responses.
+      After completing all challenges, the system confirms human presence and returns an authentication result.
     </p>
   </div>
 
@@ -440,17 +367,13 @@
 
     <div class="integration-overview">
       <p>
-        Integrating HumanAuth into your application is straightforward. Our vendor integration guide demonstrates how easy it is
-        for vendors to add HumanAuth to their existing authentication systems.
+        Easily integrate HumanAuth into your existing authentication systems.
       </p>
 
       <div class="vendor-integration-link">
         <a routerLink="/vendor-integration" class="view-integration-guide">
-          View Vendor Integration Guide →
+          View Integration Guide →
         </a>
-        <p class="integration-description">
-          Our comprehensive guide includes step-by-step instructions, API reference, and integration benefits.
-        </p>
       </div>
     </div>
   </div>
@@ -458,60 +381,49 @@
   <div class="architecture-section">
     <h3>Security Considerations</h3>
 
-    <div class="security-overview">
-      <p>
-        HumanAuth is designed with security and privacy as core principles. The system implements multiple layers of
-        protection against spoofing attempts while ensuring user privacy through careful data handling practices.
-      </p>
-    </div>
-
     <div class="security-diagram">
       <h4>Anti-Spoofing Defense Layers</h4>
       <div class="security-layers">
-        <div class="security-layer">
-          <div class="security-layer-icon physical"></div>
+        <div class="security-layer physical">
           <div class="security-layer-content">
-            <h5>Physical Presence Verification</h5>
+            <h5>Physical Presence</h5>
             <ul>
               <li>Micro-movement detection</li>
-              <li>Natural blink pattern analysis</li>
-              <li>Texture analysis to detect masks/photos</li>
+              <li>Blink pattern analysis</li>
+              <li>Texture analysis</li>
             </ul>
           </div>
         </div>
 
-        <div class="security-layer">
-          <div class="security-layer-icon spatial"></div>
+        <div class="security-layer spatial">
           <div class="security-layer-content">
             <h5>3D Spatial Analysis</h5>
             <ul>
               <li>3D consistency checks</li>
-              <li>Depth ratio verification</li>
+              <li>Depth verification</li>
               <li>Head pose estimation</li>
             </ul>
           </div>
         </div>
 
-        <div class="security-layer">
-          <div class="security-layer-icon interactive"></div>
+        <div class="security-layer interactive">
           <div class="security-layer-content">
-            <h5>Interactive Challenge Response</h5>
+            <h5>Interactive Challenges</h5>
             <ul>
-              <li>Randomized challenge sequences</li>
-              <li>Unpredictable timing requirements</li>
-              <li>Multi-modal verification (face + hands)</li>
+              <li>Random challenge sequences</li>
+              <li>Unpredictable timing</li>
+              <li>Multi-modal verification</li>
             </ul>
           </div>
         </div>
 
-        <div class="security-layer">
-          <div class="security-layer-icon api"></div>
+        <div class="security-layer api">
           <div class="security-layer-content">
             <h5>API Security</h5>
             <ul>
               <li>API key authentication</li>
               <li>Rate limiting</li>
-              <li>Session-based authentication</li>
+              <li>Session validation</li>
             </ul>
           </div>
         </div>
@@ -519,40 +431,40 @@
     </div>
 
     <div class="attack-defense-matrix">
-      <h4>Attack Vector Defense Matrix</h4>
+      <h4>Attack Vector Defense</h4>
       <div class="matrix-container">
         <table class="defense-matrix">
           <thead>
             <tr>
-              <th>Attack Vector</th>
-              <th>Defense Mechanism</th>
+              <th>Attack</th>
+              <th>Defense</th>
               <th>Effectiveness</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td>Static Photo</td>
-              <td>Micro-movement detection, blink analysis, challenge response</td>
+              <td>Movement detection, challenges</td>
               <td class="effectiveness high">High</td>
             </tr>
             <tr>
-              <td>Pre-recorded Video</td>
-              <td>Interactive challenges, timing analysis, 3D consistency</td>
+              <td>Recorded Video</td>
+              <td>Interactive challenges, 3D checks</td>
               <td class="effectiveness high">High</td>
             </tr>
             <tr>
               <td>Deepfake/GAN</td>
-              <td>Multi-modal verification, texture analysis, challenge complexity</td>
+              <td>Multi-modal verification</td>
               <td class="effectiveness medium">Medium-High</td>
             </tr>
             <tr>
               <td>3D Mask</td>
-              <td>Texture analysis, micro-expression detection, hand verification</td>
+              <td>Texture analysis, hand verification</td>
               <td class="effectiveness medium">Medium-High</td>
             </tr>
             <tr>
               <td>API Abuse</td>
-              <td>Rate limiting, API key authentication, session validation</td>
+              <td>Rate limiting, authentication</td>
               <td class="effectiveness high">High</td>
             </tr>
           </tbody>
@@ -565,39 +477,34 @@
         <h4>Privacy Protections</h4>
         <div class="privacy-features">
           <div class="privacy-feature">
-            <div class="privacy-icon temporary"></div>
             <div class="privacy-content">
-              <h5>Temporary Data Processing</h5>
-              <p>All biometric data is processed in real-time and not stored long-term</p>
+              <h5>Temporary Processing</h5>
+              <p>Real-time processing with no long-term storage</p>
             </div>
           </div>
 
           <div class="privacy-feature">
-            <div class="privacy-icon local"></div>
             <div class="privacy-content">
-              <h5>Server-Side Processing</h5>
-              <p>All sensitive processing happens on the server, not in the browser</p>
+              <h5>Server-Side Security</h5>
+              <p>Sensitive processing on secure servers</p>
             </div>
           </div>
 
           <div class="privacy-feature">
-            <div class="privacy-icon anonymous"></div>
             <div class="privacy-content">
-              <h5>Anonymous Authentication</h5>
-              <p>No personal identification or account linking required</p>
+              <h5>Anonymous Auth</h5>
+              <p>No personal identification required</p>
             </div>
           </div>
 
           <div class="privacy-feature">
-            <div class="privacy-icon session"></div>
             <div class="privacy-content">
               <h5>Session Isolation</h5>
-              <p>Each authentication session is isolated and data is deleted after completion</p>
+              <p>Data deleted after session completion</p>
             </div>
           </div>
         </div>
       </div>
-
     </div>
   </div>
 </div>
