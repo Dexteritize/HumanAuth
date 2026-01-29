@@ -5,9 +5,9 @@
 /* ===== HumanAuth Panel (component-scoped) ===== */
 .ha-panel {
   border-radius: 22px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.04));
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+  background: linear-gradient(180deg, rgba(230, 126, 95, 0.08), rgba(230, 126, 95, 0.05));
+  border: 1px solid rgba(230, 126, 95, 0.25);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.25);
   padding: clamp(14px, 2vw, 20px);
   color: rgba(255, 255, 255, 0.92);
   overflow: hidden;
@@ -107,8 +107,8 @@
   width: 9px;
   height: 9px;
   border-radius: 999px;
-  background: rgba(108, 255, 214, 0.9);
-  box-shadow: 0 0 0 4px rgba(108, 255, 214, 0.12);
+  background: rgba(230, 126, 95, 0.9);
+  box-shadow: 0 0 0 4px rgba(230, 126, 95, 0.15);
 }
 
 .ha-dot.idle {
@@ -259,7 +259,7 @@
   z-index: 10;
 
   /* Add a subtle glow effect */
-  box-shadow: 0 0 20px rgba(114, 184, 255, 0.2), 0 8px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 20px rgba(230, 126, 95, 0.2), 0 8px 30px rgba(0, 0, 0, 0.5);
 
   /* Ensure text is very readable */
   color: rgba(255, 255, 255, 0.98);
@@ -355,7 +355,7 @@
 }
 
 .ha-btn.primary {
-  background: linear-gradient(135deg, rgba(114, 184, 255, 0.85), rgba(255, 140, 223, 0.75));
+  background: linear-gradient(135deg, #e67e5f, #f4a460);
   border-color: rgba(255, 255, 255, 0.22);
 }
 

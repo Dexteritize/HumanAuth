@@ -10,7 +10,7 @@ h2 {
   font-size: clamp(1.6rem, 3vw, 2.2rem);
   text-align: center;
   margin-bottom: 30px;
-  background: linear-gradient(to right, rgba(114, 184, 255, 0.9), rgba(255, 140, 223, 0.9));
+  background: linear-gradient(to right, #ff6b35, #ffa500);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -32,7 +32,7 @@ h3::after {
   left: 0;
   width: 60px;
   height: 3px;
-  background: linear-gradient(to right, rgba(114, 184, 255, 0.7), rgba(255, 140, 223, 0.7));
+  background: linear-gradient(to right, #ff6b35, #ffa500);
   border-radius: 3px;
 }
 
@@ -71,7 +71,7 @@ li {
 .back-link {
   display: inline-block;
   margin-top: 10px;
-  color: rgba(114, 184, 255, 0.9);
+  color: rgba(255, 107, 53, 0.95);
   text-decoration: none;
   font-weight: 500;
   transition: color 0.2s ease;
@@ -98,8 +98,8 @@ li {
   display: flex;
   align-items: flex-start;
   gap: 15px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 107, 53, 0.08);
+  border: 1px solid rgba(255, 165, 0, 0.25);
   border-radius: 14px;
   padding: 20px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -107,8 +107,8 @@ li {
 
 .step:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 20px rgba(255, 20, 147, 0.2);
+  background: rgba(255, 107, 53, 0.12);
 }
 
 .step-number {
@@ -117,7 +117,7 @@ li {
   justify-content: center;
   min-width: 40px;
   height: 40px;
-  background: linear-gradient(135deg, rgba(114, 184, 255, 0.8), rgba(255, 140, 223, 0.8));
+  background: linear-gradient(135deg, #ff6b35, #ffa500);
   border-radius: 50%;
   color: rgba(255, 255, 255, 0.95);
   font-weight: 700;
@@ -138,8 +138,8 @@ li {
 }
 
 .integration-complete-example {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 107, 53, 0.06);
+  border: 1px solid rgba(255, 165, 0, 0.2);
   border-radius: 16px;
   padding: 25px;
   margin-top: 40px;
@@ -162,8 +162,8 @@ li {
 }
 
 .endpoint {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 107, 53, 0.08);
+  border: 1px solid rgba(255, 165, 0, 0.25);
   border-radius: 12px;
   padding: 20px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -175,13 +175,13 @@ li {
 
 .endpoint:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 8px 20px rgba(255, 20, 147, 0.2);
+  background: rgba(255, 107, 53, 0.12);
 }
 
 .endpoint h4 {
   margin-top: 0;
-  color: rgba(114, 184, 255, 0.9);
+  color: rgba(255, 107, 53, 0.95);
   font-family: 'Courier New', monospace;
   overflow-wrap: break-word;
   word-wrap: break-word;
@@ -214,9 +214,9 @@ li {
 .diagram-container {
   margin: 40px 0;
   padding: 20px;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 107, 53, 0.06);
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 165, 0, 0.2);
   overflow-x: auto;
 }
 
@@ -230,8 +230,8 @@ li {
 }
 
 .diagram-node {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 107, 53, 0.08);
+  border: 1px solid rgba(255, 165, 0, 0.25);
   border-radius: 12px;
   padding: 15px;
   margin: 10px;
@@ -243,8 +243,8 @@ li {
 
 .diagram-node:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 20px rgba(255, 20, 147, 0.25);
+  background: rgba(255, 107, 53, 0.12);
   z-index: 2;
 }
 
@@ -257,7 +257,7 @@ li {
   justify-content: center;
   width: 30px;
   height: 30px;
-  background: linear-gradient(135deg, rgba(114, 184, 255, 0.8), rgba(255, 140, 223, 0.8));
+  background: linear-gradient(135deg, #ff6b35, #ffa500);
   border-radius: 50%;
   color: rgba(255, 255, 255, 0.95);
   font-weight: 700;
@@ -272,7 +272,7 @@ li {
 .node-content h5 {
   margin-top: 0;
   margin-bottom: 8px;
-  color: rgba(114, 184, 255, 0.9);
+  color: rgba(255, 107, 53, 0.95);
   font-size: 1.1rem;
 }
 
@@ -308,7 +308,7 @@ li {
 .diagram-connector.horizontal {
   align-self: center;
   height: 2px;
-  background: linear-gradient(to right, rgba(114, 184, 255, 0.5), rgba(255, 140, 223, 0.5));
+  background: linear-gradient(to right, rgba(255, 107, 53, 0.5), rgba(255, 165, 0, 0.5));
   margin: 0 -10px;
 }
 
@@ -318,13 +318,13 @@ li {
   top: 50%;
   right: 5px;
   transform: translateY(-50%);
-  color: rgba(255, 140, 223, 0.8);
+  color: rgba(255, 165, 0, 0.9);
   font-size: 1.2rem;
 }
 
 .diagram-connector.vertical {
   width: 2px;
-  background: linear-gradient(to bottom, rgba(255, 140, 223, 0.5), rgba(114, 184, 255, 0.5));
+  background: linear-gradient(to bottom, rgba(255, 165, 0, 0.5), rgba(255, 107, 53, 0.5));
   justify-self: center;
   align-self: stretch;
   margin: -10px 0;
@@ -336,7 +336,7 @@ li {
   bottom: 5px;
   left: 50%;
   transform: translateX(-50%);
-  color: rgba(114, 184, 255, 0.8);
+  color: rgba(255, 107, 53, 0.9);
   font-size: 1.2rem;
 }
 

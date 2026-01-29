@@ -14,8 +14,9 @@
       <div class="diagram-container">
         <div class="diagram-row">
           <div class="diagram-column">
-            <div class="diagram-label">Client Applications</div>
+            <div class="diagram-label">🖥️ Client Applications</div>
             <div class="diagram-box frontend">
+              <div class="box-icon">🎨</div>
               <h4>Demo Page</h4>
               <div class="diagram-content">
                 <p>Angular Application</p>
@@ -26,8 +27,9 @@
                 </ul>
               </div>
             </div>
-            <div class="diagram-arrow down">↓</div>
+            <div class="diagram-arrow down">⬇️</div>
             <div class="diagram-box frontend vendor">
+              <div class="box-icon">🏢</div>
               <h4>Vendor Integration</h4>
               <div class="diagram-content">
                 <p>External Applications</p>
@@ -41,8 +43,9 @@
           </div>
 
           <div class="diagram-column">
-            <div class="diagram-label">Communication</div>
+            <div class="diagram-label">🔄 Communication</div>
             <div class="diagram-box api">
+              <div class="box-icon">🌐</div>
               <h4>REST API</h4>
               <div class="diagram-content">
                 <p>HTTP Endpoints</p>
@@ -53,11 +56,19 @@
                 </ul>
               </div>
             </div>
+            <div class="api-arrows">
+              <span class="arrow-left">⬅️</span>
+              <span class="arrow-label">Requests</span>
+              <br>
+              <span class="arrow-right">➡️</span>
+              <span class="arrow-label">Responses</span>
+            </div>
           </div>
 
           <div class="diagram-column">
-            <div class="diagram-label">Server Components</div>
+            <div class="diagram-label">⚡ Server Components</div>
             <div class="diagram-box backend">
+              <div class="box-icon">🔧</div>
               <h4>Flask Server</h4>
               <div class="diagram-content">
                 <p>API Handlers</p>
@@ -68,8 +79,9 @@
                 </ul>
               </div>
             </div>
-            <div class="diagram-arrow down">↓</div>
+            <div class="diagram-arrow down">⬇️</div>
             <div class="diagram-box backend engine">
+              <div class="box-icon">🤖</div>
               <h4>HumanAuth Engine</h4>
               <div class="diagram-content">
                 <p>Core Authentication</p>
@@ -86,9 +98,10 @@
     </div>
 
     <div class="integration-points">
-      <h4>Integration Points</h4>
+      <h4>🔗 Integration Points</h4>
       <div class="integration-row">
         <div class="integration-box demo">
+          <div class="integration-icon">🎨</div>
           <h5>Demo Page Integration</h5>
           <p>Reference implementation with:</p>
           <ul>
@@ -98,6 +111,7 @@
           </ul>
         </div>
         <div class="integration-box vendor">
+          <div class="integration-icon">🏢</div>
           <h5>Vendor Integration</h5>
           <p>External applications connect via:</p>
           <ul>
@@ -117,91 +131,120 @@
   </div>
 
   <div class="architecture-section">
-    <h3>Backend Architecture</h3>
+    <h3>⚙️ Backend Architecture</h3>
     <div class="component-details">
-      <h4>Flask Server (app.py)</h4>
-      <p>
-        Built with Flask, providing REST API endpoints for frontend communication.
-      </p>
-      <div class="code-example">
-        <pre><code>
-# Key components in app.py
-- REST API endpoints for session management
-- Authentication middleware
-- Error handling
-        </code></pre>
+      <div class="component-card">
+        <div class="component-icon">🔧</div>
+        <h4>Flask Server (app.py)</h4>
+        <p>
+          Built with Flask, providing REST API endpoints for frontend communication.
+        </p>
+        <div class="code-example">
+          <pre><code>Key components in app.py
+├─ REST API endpoints for session management
+├─ Authentication middleware
+└─ Error handling
+          </code></pre>
+        </div>
       </div>
 
-      <h4>Human Authentication Engine (human_auth.py)</h4>
-      <p>
-        Core authentication logic using MediaPipe for face and hand landmark detection.
-      </p>
-      <div class="code-example">
-        <pre><code>
-# Key components in human_auth.py
-- Face landmark detection
-- Hand gesture recognition
-- Challenge generation
-- Anti-spoofing: micro-movements, blink patterns, 3D checks
-        </code></pre>
+      <div class="component-card engine-card">
+        <div class="component-icon">🤖</div>
+        <h4>Human Authentication Engine (human_auth.py)</h4>
+        <p>
+          Core authentication logic using MediaPipe for face and hand landmark detection.
+        </p>
+        <div class="code-example">
+          <pre><code>Key components in human_auth.py
+├─ Face landmark detection
+├─ Hand gesture recognition
+├─ Challenge generation
+└─ Anti-spoofing: micro-movements, blink patterns, 3D checks
+          </code></pre>
+        </div>
       </div>
 
       <div class="tech-details">
         <div class="tech-item">
+          <div class="tech-icon">👤</div>
           <h5>Face Landmark Detection</h5>
           <p>
             Tracks 468 3D points to analyze expressions, head pose, and micro-movements.
           </p>
+          <div class="visual-indicator">
+            <div class="landmark-dots">
+              <span>•</span><span>•</span><span>•</span><span>•</span><span>•</span>
+              <span>•</span><span>•</span><span>•</span><span>•</span><span>•</span>
+            </div>
+            <div class="landmark-label">468 tracking points</div>
+          </div>
         </div>
         <div class="tech-item">
+          <div class="tech-icon">✋</div>
           <h5>Hand Landmark Detection</h5>
           <p>
             Tracks 21 points per hand for gesture recognition and challenge verification.
           </p>
+          <div class="visual-indicator">
+            <div class="landmark-dots">
+              <span>•</span><span>•</span><span>•</span><span>•</span><span>•</span>
+            </div>
+            <div class="landmark-label">21 points per hand</div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
   <div class="architecture-section">
-    <h3>Frontend Architecture</h3>
+    <h3>🎨 Frontend Architecture</h3>
     <div class="component-details">
-      <h4>Angular Application</h4>
-      <p>
-        Built with Angular, providing a responsive interface for the authentication process.
-      </p>
+      <div class="component-card">
+        <div class="component-icon angular-logo">
+          <svg width="64" height="64" viewBox="0 0 250 250" xmlns="http://www.w3.org/2000/svg">
+            <path fill="#DD0031" d="M125 30L31.9 63.2l14.2 123.1L125 230l78.9-43.7 14.2-123.1z"/>
+            <path fill="#C3002F" d="M125 30v22.2-.1V230l78.9-43.7 14.2-123.1L125 30z"/>
+            <path fill="#FFFFFF" d="M125 52.1L66.8 182.6h21.7l11.7-29.2h49.4l11.7 29.2H183L125 52.1zm17 83.3h-34l17-40.9 17 40.9z"/>
+          </svg>
+        </div>
+        <h4>Angular Application</h4>
+        <p>
+          Built with Angular, providing a responsive interface for the authentication process.
+        </p>
+      </div>
 
       <div class="tech-details">
         <div class="tech-item">
+          <div class="tech-icon">📹</div>
           <h5>Auth Page Component</h5>
           <p>
             Handles UI for authentication, including camera preview and challenge display.
           </p>
         </div>
         <div class="tech-item">
+          <div class="tech-icon">📷</div>
           <h5>Camera Service</h5>
           <p>
             Manages camera access and frame capture.
           </p>
           <div class="code-example">
-            <pre><code>
-// Key methods
-- start(): Initializes camera
-- capture(): Captures frames
+            <pre><code>Key methods
+├─ start(): Initializes camera
+└─ capture(): Captures frames
             </code></pre>
           </div>
         </div>
         <div class="tech-item">
+          <div class="tech-icon">🔐</div>
           <h5>Auth Service</h5>
           <p>
             Handles API communication and session management.
           </p>
           <div class="code-example">
-            <pre><code>
-// Key methods
-- initialize(): Fetches config
-- startAuth(): Creates session
-- processFrame(): Sends frames
+            <pre><code>Key methods
+├─ initialize(): Fetches config
+├─ startAuth(): Creates session
+└─ processFrame(): Sends frames
             </code></pre>
           </div>
         </div>
@@ -210,28 +253,33 @@
   </div>
 
   <div class="architecture-section">
-    <h3>API Communication</h3>
+    <h3>🌐 API Communication</h3>
     <div class="component-details">
       <h4>REST API Endpoints</h4>
       <div class="api-endpoints">
         <div class="endpoint">
-          <h5>GET /api/config</h5>
+          <div class="endpoint-method get">GET</div>
+          <h5>/api/config</h5>
           <p>Returns API configuration</p>
         </div>
         <div class="endpoint">
-          <h5>POST /api/sessions</h5>
+          <div class="endpoint-method post">POST</div>
+          <h5>/api/sessions</h5>
           <p>Creates a new authentication session</p>
         </div>
         <div class="endpoint">
-          <h5>POST /api/sessions/&#123;session_id&#125;/process</h5>
+          <div class="endpoint-method post">POST</div>
+          <h5>/api/sessions/&#123;session_id&#125;/process</h5>
           <p>Processes a frame and returns results</p>
         </div>
         <div class="endpoint">
-          <h5>POST /api/sessions/&#123;session_id&#125;/reset</h5>
+          <div class="endpoint-method post">POST</div>
+          <h5>/api/sessions/&#123;session_id&#125;/reset</h5>
           <p>Resets the current session</p>
         </div>
         <div class="endpoint">
-          <h5>POST /api/verify</h5>
+          <div class="endpoint-method post">POST</div>
+          <h5>/api/verify</h5>
           <p>One-time frame verification</p>
         </div>
       </div>
@@ -239,14 +287,14 @@
   </div>
 
   <div class="architecture-section">
-    <h3>Authentication Flow</h3>
+    <h3>🔄 Authentication Flow</h3>
 
     <div class="flow-diagram-container">
       <div class="flow-column demo">
-        <h4>Demo Page Flow</h4>
+        <h4>🎨 Demo Page Flow</h4>
         <div class="flow-diagram">
           <div class="flow-step">
-            <div class="flow-number">1</div>
+            <div class="flow-number">1️⃣</div>
             <div class="flow-content">
               <h5>Initialize</h5>
               <p>Load and initialize AuthService</p>
@@ -255,9 +303,9 @@
               </div>
             </div>
           </div>
-          <div class="flow-arrow">↓</div>
+          <div class="flow-arrow">⬇️</div>
           <div class="flow-step">
-            <div class="flow-number">2</div>
+            <div class="flow-number">2️⃣</div>
             <div class="flow-content">
               <h5>Start Camera</h5>
               <p>Begin authentication process</p>
@@ -266,9 +314,9 @@
               </div>
             </div>
           </div>
-          <div class="flow-arrow">↓</div>
+          <div class="flow-arrow">⬇️</div>
           <div class="flow-step">
-            <div class="flow-number">3</div>
+            <div class="flow-number">3️⃣</div>
             <div class="flow-content">
               <h5>Create Session</h5>
               <p>Start authentication session</p>
@@ -277,9 +325,9 @@
               </div>
             </div>
           </div>
-          <div class="flow-arrow">↓</div>
+          <div class="flow-arrow">⬇️</div>
           <div class="flow-step">
-            <div class="flow-number">4</div>
+            <div class="flow-number">4️⃣</div>
             <div class="flow-content">
               <h5>Process Frames</h5>
               <p>Send frames for processing</p>
@@ -288,9 +336,9 @@
               </div>
             </div>
           </div>
-          <div class="flow-arrow">↓</div>
+          <div class="flow-arrow">⬇️</div>
           <div class="flow-step">
-            <div class="flow-number">5</div>
+            <div class="flow-number">5️⃣</div>
             <div class="flow-content">
               <h5>Complete Auth</h5>
               <p>Verify human presence</p>
