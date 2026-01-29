@@ -81,6 +81,7 @@ export class AuthPageComponent implements OnDestroy {
   async start() {
     // Reset any previous UI state
     this.error = undefined;
+    this.result = undefined; // Clear previous authentication result
     try {
       // Start the camera
       await this.cam.start(this.video.nativeElement);
