@@ -72,6 +72,229 @@ li {
   border: 1px solid rgba(230, 126, 95, 0.2);
 }
 
+/* Simple Flow Diagram */
+.flow-description {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto var(--space-xl);
+  padding: var(--space-md);
+  background: rgba(230, 126, 95, 0.05);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(230, 126, 95, 0.15);
+}
+
+.simple-flow-diagram {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  margin: var(--space-xl) 0;
+  flex-wrap: wrap;
+}
+
+.flow-box {
+  flex: 1;
+  min-width: 220px;
+  max-width: 280px;
+  background: rgba(230, 126, 95, 0.08);
+  border: 2px solid rgba(230, 126, 95, 0.25);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.flow-box:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(230, 126, 95, 0.2);
+}
+
+.flow-header {
+  background: linear-gradient(135deg, rgba(230, 126, 95, 0.15), rgba(244, 164, 96, 0.15));
+  padding: var(--space-md);
+  text-align: center;
+  border-bottom: 2px solid rgba(230, 126, 95, 0.2);
+}
+
+.flow-icon {
+  font-size: 2rem;
+  margin-bottom: var(--space-xs);
+}
+
+.flow-header h4 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #e67e5f;
+  font-weight: 600;
+}
+
+.flow-body {
+  padding: var(--space-md);
+}
+
+.flow-section {
+  margin-bottom: var(--space-md);
+}
+
+.flow-section:last-child {
+  margin-bottom: 0;
+}
+
+.section-icon {
+  font-size: 1.5rem;
+  text-align: center;
+  margin-bottom: var(--space-xs);
+}
+
+.flow-section h5 {
+  margin: var(--space-xs) 0;
+  font-size: 1rem;
+  color: var(--text-color);
+  text-align: center;
+  font-weight: 600;
+}
+
+.tech-label {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--muted-color);
+  margin-bottom: var(--space-sm);
+  font-style: italic;
+}
+
+.flow-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.flow-section li {
+  padding: var(--space-xs);
+  margin: var(--space-xs) 0;
+  background: rgba(230, 126, 95, 0.05);
+  border-left: 3px solid rgba(230, 126, 95, 0.4);
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.internal-arrow {
+  text-align: center;
+  font-size: 1.5rem;
+  margin: var(--space-sm) 0;
+  color: #e67e5f;
+}
+
+.flow-connector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 80px;
+}
+
+.connector-line {
+  width: 40px;
+  height: 3px;
+  background: linear-gradient(to right, rgba(230, 126, 95, 0.3), rgba(230, 126, 95, 0.6), rgba(230, 126, 95, 0.3));
+  position: relative;
+}
+
+.connector-line::after {
+  content: '▶';
+  position: absolute;
+  right: -8px;
+  top: -8px;
+  color: #e67e5f;
+  font-size: 1rem;
+}
+
+.connector-labels {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin-top: var(--space-xs);
+  text-align: center;
+}
+
+.request-label,
+.response-label {
+  font-size: 0.75rem;
+  color: var(--muted-color);
+  white-space: nowrap;
+}
+
+/* Integration Cards */
+.integration-points {
+  margin-top: var(--space-xl);
+  padding: var(--space-lg);
+  background: rgba(230, 126, 95, 0.04);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(230, 126, 95, 0.15);
+}
+
+.integration-points h4 {
+  text-align: center;
+  color: #e67e5f;
+  margin-bottom: var(--space-lg);
+  font-size: 1.3rem;
+}
+
+.integration-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-lg);
+}
+
+.integration-card {
+  background: rgba(230, 126, 95, 0.06);
+  border: 2px solid rgba(230, 126, 95, 0.2);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.integration-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(230, 126, 95, 0.15);
+  border-color: rgba(230, 126, 95, 0.4);
+}
+
+.card-icon {
+  font-size: 2.5rem;
+  text-align: center;
+  margin-bottom: var(--space-sm);
+}
+
+.integration-card h5 {
+  text-align: center;
+  color: #e67e5f;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: var(--space-xs);
+}
+
+.card-desc {
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--muted-color);
+  margin-bottom: var(--space-md);
+  font-style: italic;
+}
+
+.card-features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.card-features li {
+  padding: var(--space-sm);
+  margin: var(--space-xs) 0;
+  background: rgba(230, 126, 95, 0.08);
+  border-left: 3px solid #e67e5f;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
 /* Vendor Integration Link Styles */
 .vendor-integration-link {
   margin: 25px 0;

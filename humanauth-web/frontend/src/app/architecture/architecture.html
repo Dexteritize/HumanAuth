@@ -10,124 +10,129 @@
 
   <div class="architecture-overview">
     <h3>System Overview</h3>
-    <div class="architecture-diagram">
-      <div class="diagram-container">
-        <div class="diagram-row">
-          <div class="diagram-column">
-            <div class="diagram-label">🖥️ Client Applications</div>
-            <div class="diagram-box frontend">
-              <div class="box-icon">🎨</div>
-              <h4>Demo Page</h4>
-              <div class="diagram-content">
-                <p>Angular Application</p>
-                <ul>
-                  <li>Auth Page Component</li>
-                  <li>Camera Service</li>
-                  <li>Auth Service</li>
-                </ul>
-              </div>
-            </div>
-            <div class="diagram-arrow down">⬇️</div>
-            <div class="diagram-box frontend vendor">
-              <div class="box-icon">🏢</div>
-              <h4>Vendor Integration</h4>
-              <div class="diagram-content">
-                <p>External Applications</p>
-                <ul>
-                  <li>Custom UI</li>
-                  <li>API Client</li>
-                  <li>Business Logic</li>
-                </ul>
-              </div>
-            </div>
-          </div>
+    
+    <div class="flow-description">
+      <p>
+        The frontend captures camera frames and sends them to the backend via the API.
+        The backend processes these frames using MediaPipe to detect faces and hands, verifying human presence
+        through interactive challenges.
+      </p>
+    </div>
 
-          <div class="diagram-column">
-            <div class="diagram-label">🔄 Communication</div>
-            <div class="diagram-box api">
-              <div class="box-icon">🌐</div>
-              <h4>REST API</h4>
-              <div class="diagram-content">
-                <p>HTTP Endpoints</p>
-                <ul>
-                  <li>Session Management</li>
-                  <li>Frame Processing</li>
-                  <li>Authentication</li>
-                </ul>
-              </div>
-            </div>
-            <div class="api-arrows">
-              <span class="arrow-left">⬅️</span>
-              <span class="arrow-label">Requests</span>
-              <br>
-              <span class="arrow-right">➡️</span>
-              <span class="arrow-label">Responses</span>
-            </div>
+    <div class="simple-flow-diagram">
+      <!-- Client -->
+      <div class="flow-box client">
+        <div class="flow-header">
+          <div class="flow-icon">🖥️</div>
+          <h4>Client Application</h4>
+        </div>
+        <div class="flow-body">
+          <div class="flow-section">
+            <div class="section-icon">🎨</div>
+            <h5>Demo Page</h5>
+            <p class="tech-label">Angular Application</p>
+            <ul>
+              <li>Auth Page Component</li>
+              <li>Camera Service</li>
+              <li>Auth Service</li>
+            </ul>
           </div>
+        </div>
+      </div>
 
-          <div class="diagram-column">
-            <div class="diagram-label">⚡ Server Components</div>
-            <div class="diagram-box backend">
-              <div class="box-icon">🔧</div>
-              <h4>Flask Server</h4>
-              <div class="diagram-content">
-                <p>API Handlers</p>
-                <ul>
-                  <li>Request Validation</li>
-                  <li>Session Management</li>
-                  <li>CORS & Security</li>
-                </ul>
-              </div>
-            </div>
-            <div class="diagram-arrow down">⬇️</div>
-            <div class="diagram-box backend engine">
-              <div class="box-icon">🤖</div>
-              <h4>HumanAuth Engine</h4>
-              <div class="diagram-content">
-                <p>Core Authentication</p>
-                <ul>
-                  <li>MediaPipe Integration</li>
-                  <li>Face & Hand Detection</li>
-                  <li>Challenge Generation</li>
-                </ul>
-              </div>
-            </div>
+      <!-- Communication Arrow -->
+      <div class="flow-connector">
+        <div class="connector-line"></div>
+        <div class="connector-labels">
+          <span class="request-label">⬅️ Requests</span>
+          <span class="response-label">➡️ Responses</span>
+        </div>
+      </div>
+
+      <!-- API -->
+      <div class="flow-box api">
+        <div class="flow-header">
+          <div class="flow-icon">🔄</div>
+          <h4>REST API</h4>
+        </div>
+        <div class="flow-body">
+          <div class="flow-section">
+            <div class="section-icon">🌐</div>
+            <h5>HTTP Endpoints</h5>
+            <ul>
+              <li>Session Management</li>
+              <li>Frame Processing</li>
+              <li>Authentication</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Communication Arrow -->
+      <div class="flow-connector">
+        <div class="connector-line"></div>
+      </div>
+
+      <!-- Server -->
+      <div class="flow-box server">
+        <div class="flow-header">
+          <div class="flow-icon">⚡</div>
+          <h4>Server Components</h4>
+        </div>
+        <div class="flow-body">
+          <div class="flow-section">
+            <div class="section-icon">🔧</div>
+            <h5>Flask Server</h5>
+            <p class="tech-label">API Handlers</p>
+            <ul>
+              <li>Request Validation</li>
+              <li>Session Management</li>
+              <li>CORS & Security</li>
+            </ul>
+          </div>
+          <div class="internal-arrow">⬇️</div>
+          <div class="flow-section">
+            <div class="section-icon">🤖</div>
+            <h5>HumanAuth Engine</h5>
+            <p class="tech-label">Core Authentication</p>
+            <ul>
+              <li>MediaPipe Integration</li>
+              <li>Face & Hand Detection</li>
+              <li>Challenge Generation</li>
+            </ul>
           </div>
         </div>
       </div>
     </div>
 
     <div class="integration-points">
-      <h4>🔗 Integration Points</h4>
-      <div class="integration-row">
-        <div class="integration-box demo">
-          <div class="integration-icon">🎨</div>
-          <h5>Demo Page Integration</h5>
-          <p>Reference implementation with:</p>
-          <ul>
-            <li>Camera access and frame capture</li>
+      <h4>🔗 Integration Options</h4>
+      <div class="integration-cards">
+        <div class="integration-card demo">
+          <div class="card-icon">🎨</div>
+          <h5>Demo Page</h5>
+          <p class="card-desc">Reference implementation</p>
+          <ul class="card-features">
+            <li>Camera access & frame capture</li>
             <li>API communication</li>
-            <li>Challenge display and feedback</li>
+            <li>Challenge display & feedback</li>
+            <li>Complete authentication workflow</li>
           </ul>
         </div>
-        <div class="integration-box vendor">
-          <div class="integration-icon">🏢</div>
-          <h5>Vendor Integration</h5>
-          <p>External applications connect via:</p>
-          <ul>
-            <li>REST API with API key auth</li>
-            <li>CORS support</li>
+        
+        <div class="integration-card external">
+          <div class="card-icon">🌐</div>
+          <h5>External Applications</h5>
+          <p class="card-desc">Connect your own app</p>
+          <ul class="card-features">
+            <li>REST API with session management</li>
+            <li>Standard HTTP endpoints</li>
+            <li>CORS support for web apps</li>
             <li>Standardized JSON responses</li>
           </ul>
         </div>
       </div>
     </div>
-
-    <p>
-      The frontend captures camera frames and sends them to the backend via the API.
-      The backend processes these frames using MediaPipe to detect faces and hands, verifying human presence
-      through interactive challenges.
-    </p>
   </div>
 
   <div class="architecture-section">
@@ -408,22 +413,6 @@
       The backend analyzes these frames using MediaPipe, issues challenges, and verifies responses.
       After completing all challenges, the system confirms human presence and returns an authentication result.
     </p>
-  </div>
-
-  <div class="architecture-section">
-    <h3>Vendor Integration</h3>
-
-    <div class="integration-overview">
-      <p>
-        Easily integrate HumanAuth into your existing authentication systems.
-      </p>
-
-      <div class="vendor-integration-link">
-        <a routerLink="/vendor-integration" class="view-integration-guide">
-          View Integration Guide →
-        </a>
-      </div>
-    </div>
   </div>
 
   <div class="architecture-section">
