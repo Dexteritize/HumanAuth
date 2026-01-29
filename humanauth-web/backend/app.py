@@ -384,7 +384,7 @@ def api_v1_reset_session(session_id):
 
 @app.route("/api/v1/sessions/<session_id>/process", methods=["POST"])
 @require_api_key
-@limiter.limit("120 per minute")
+@limiter.limit("600 per minute")  # Increased from 120 to 600 for demo purposes (10 fps)
 def api_v1_process_frame(session_id):
     """Process a frame in an existing session"""
     if not session_id or session_id not in auth_sessions:

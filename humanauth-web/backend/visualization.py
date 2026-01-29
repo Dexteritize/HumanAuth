@@ -256,8 +256,8 @@ def draw_debug(frame, result: AuthResult, current_landmarks=None, current_hand_l
                 instruction = "Please nod your head down"
             elif challenge == "SMILE":
                 instruction = "Please smile"
-            elif challenge == "RAISE_EYEBROWS":
-                instruction = "Please raise your eyebrows"
+            elif challenge == "BLINK_ONCE":
+                instruction = "Please blink your eyes once"
             elif challenge == "SHOW_PEACE_SIGN":
                 instruction = "Please show a peace sign with your hand"
             elif challenge == "SHOW_THUMBS_UP":
@@ -323,10 +323,10 @@ def draw_debug(frame, result: AuthResult, current_landmarks=None, current_hand_l
                     1,
                     cv2.LINE_AA,
                 )
-            elif challenge == "RAISE_EYEBROWS":
+            elif challenge == "BLINK_ONCE":
                 cv2.putText(
                     frame,
-                    "Raise your eyebrows as if surprised",
+                    "Close and open your eyes naturally one time",
                     (40, h - 80),
                     font,
                     0.6,

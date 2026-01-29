@@ -104,7 +104,7 @@ HAND_CONNECTIONS = [
 
 # Challenge types - restricted to only three specific challenges as requested
 CHALLENGES = [
-    "RAISE_EYEBROWS",      # Raise eyebrows
+    "BLINK_ONCE",          # Blink once
     "SHOW_PEACE_SIGN",     # Make a peace sign with hand
     "SHOW_FIVE_FINGERS"    # Show all five fingers (open hand)
 ]
@@ -176,6 +176,7 @@ class HumanAuth:
         self.challenge_start_time = None
         self.challenge_completed = False
         self.challenge_response_time = None
+        self.challenge_blink_count = 0  # Count blinks during the BLINK_THREE_TIMES challenge
         
         # Authentication state
         self.auth_confidence = 0.0
@@ -512,6 +513,7 @@ class HumanAuth:
         self.challenge_completed = False
         self.challenge_response_time = None
         self.next_challenge_time = None
+        self.challenge_blink_count = 0  # Reset blink count for BLINK_THREE_TIMES challenge
         return challenge
     
     def _check_challenge_response(self, landmarks, blendshapes, hand_detected=False, hand_gesture="NONE") -> Tuple[bool, float]:
@@ -566,13 +568,14 @@ class HumanAuth:
                         if blendshape.score > 0.7:
                             completed = True
                             break
-            elif self.current_challenge == "RAISE_EYEBROWS":
-                # Check for raised eyebrows in blendshapes
-                for blendshape in blendshapes:
-                    if blendshape.category_name == "browOuterUpLeft" or blendshape.category_name == "browOuterUpRight":
-                        if blendshape.score > 0.7:
-                            completed = True
-                            break
+            elif self.current_challenge == "BLINK_ONCE":
+                # Check for blink
+                left_eye = [landmarks[i] for i in [33, 160, 158, 133, 153, 144]]
+                ear = self._calculate_eye_aspect_ratio(left_eye)
+                
+                # If we detect a blink, complete the challenge immediately
+                if ear < BLINK_THRESHOLD:
+                    completed = True
         
         # Hand-based challenges
         if self.current_challenge == "SHOW_HAND" and hand_detected:
@@ -985,6 +988,16 @@ class HumanAuth:
         details["blink_pattern_score"] = blink_pattern_score
         details["challenge_response_score"] = challenge_response_score
         details["texture_score"] = texture_score
+        
+        # Add scores object for visualization
+        details["scores"] = {
+            "Micro Movement": micro_movement_score,
+            "3D Consistency": consistency_score,
+            "Blink Pattern": blink_pattern_score,
+            "Challenge Response": challenge_response_score,
+            "Texture Analysis": texture_score,
+            "Hand Detection": hand_detection_score
+        }
 
         # Calculate overall confidence (tuned)
         # Passive baseline: small initial confidence so the UI shows a value early

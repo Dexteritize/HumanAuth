@@ -62,7 +62,7 @@ export class AuthPageComponent implements OnDestroy {
   private animationFrameId?: number;
   // Frame rate control
   private lastFrameTime = 0;
-  private targetFrameInterval = 1000 / 10; // Target 10 fps for processing
+  private targetFrameInterval = 1000 / 10; // Target 10 fps for processing (backend rate limit increased to 600/min)
   // Async processing control
   private processingFrame = false;
   private pendingFrame = false;
@@ -131,6 +131,45 @@ export class AuthPageComponent implements OnDestroy {
 
     this.cam.stop();
     this.auth.disconnect();
+  }
+
+  async reload() {
+    // Reset any previous error state
+    this.error = undefined;
+
+    try {
+      // Reset the authentication session without stopping the camera
+      console.log("Reloading authentication session...");
+
+      // Reset processing state flags
+      this.processingFrame = false;
+      this.pendingFrame = false;
+
+      // Reset result data
+      this.result = undefined;
+
+      // Reset the authentication session on the backend
+      await this.auth.resetAuth();
+
+      // Force a new frame capture and processing immediately
+      if (this.running) {
+        const frame = this.cam.capture(
+          this.video.nativeElement,
+          this.captureCanvas,
+          0.5
+        );
+        this.processingFrame = true;
+        this.processFrameAsync(frame);
+      }
+
+      console.log("Authentication session reloaded successfully");
+    } catch (e: any) {
+      // Handle any errors that occur during reload
+      this.zone.run(() => {
+        this.error = e?.message || String(e);
+        console.error("Error reloading authentication session:", e);
+      });
+    }
   }
 
   async loop() {
@@ -266,6 +305,11 @@ export class AuthPageComponent implements OnDestroy {
     ctx.fillStyle = 'rgba(0, 0, 0, 0.72)'; // slightly darker
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    // Draw metrics scores if available
+    if (result.details?.['scores']) {
+      this.drawMetricsScores(ctx, result.details['scores']);
+    }
+
     // Draw landmarks using a flipped drawing transform so they align with the mirrored video
     ctx.save();
     ctx.setTransform(-1, 0, 0, 1, canvas.width, 0);
@@ -344,31 +388,20 @@ export class AuthPageComponent implements OnDestroy {
       return;
     }
 
-    // Draw challenge information if available
+    // Draw challenge information if available (without panel background)
     if (result.details?.['current_challenge']) {
-      // Draw challenge panel (more opaque)
+      // Define positioning variables (panel background removed as requested)
       const panelTop = 50;
       const panelWidth = canvas.width / 2 - 20;
-      const panelHeight = 100;
 
-      ctx.save();
-      ctx.shadowColor = 'rgba(0,0,0,0.6)';
-      ctx.shadowBlur = 18;
-      ctx.fillStyle = 'rgba(30, 30, 60, 0.96)'; // nearly opaque
-      ctx.fillRect(10, panelTop, panelWidth, panelHeight);
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = 'rgba(100, 100, 180, 1)';
-      ctx.strokeRect(10, panelTop, panelWidth, panelHeight);
-      ctx.restore();
-
-      // Draw challenge title
-      ctx.font = '16px Arial';
-      ctx.fillStyle = 'rgb(150, 150, 255)';
+      // Draw challenge title with improved visibility (panel background removed)
+      ctx.font = 'bold 16px Arial';
+      ctx.fillStyle = 'rgb(200, 200, 255)'; // Brighter blue for better visibility
       ctx.fillText('CURRENT CHALLENGE', 20, panelTop + 20);
 
-      // Draw challenge name
-      ctx.font = '18px Arial';
-      ctx.fillStyle = result.details?.['challenge_completed'] ? 'green' : 'orange';
+      // Draw challenge name with improved visibility
+      ctx.font = 'bold 18px Arial';
+      ctx.fillStyle = result.details?.['challenge_completed'] ? 'rgb(100, 255, 100)' : 'rgb(255, 200, 50)'; // Brighter colors
 
       // Safely format the challenge name with null check
       const challengeName = result.details?.['current_challenge'] || '';
@@ -521,6 +554,75 @@ export class AuthPageComponent implements OnDestroy {
     // Reset any lingering shadow state
     ctx.shadowBlur = 0;
     ctx.shadowColor = 'transparent';
+  }
+
+  // Draw metrics scores on the canvas
+  drawMetricsScores(ctx: CanvasRenderingContext2D, scores: Record<string, number>) {
+    if (!scores || Object.keys(scores).length === 0) return;
+
+    // Draw semi-transparent panel background for metrics
+    const panelHeight = 30 + (Object.keys(scores).length * 30);
+    const panelWidth = 280;
+    const panelX = 20;
+    const panelY = 100;
+
+    ctx.save();
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+    ctx.fillRect(panelX, panelY, panelWidth, panelHeight);
+    ctx.strokeStyle = 'rgba(100, 100, 180, 0.8)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(panelX, panelY, panelWidth, panelHeight);
+
+    // Draw panel title
+    ctx.font = '16px Arial';
+    ctx.fillStyle = 'rgba(150, 150, 255, 1)';
+    ctx.textAlign = 'left';
+    ctx.fillText('METRICS SCORES', panelX + 10, panelY + 25);
+
+    // Draw scores with pass/fail indicators
+    let yPos = panelY + 55;
+    const font = '14px Arial';
+
+    for (const [name, score] of Object.entries(scores)) {
+      // Determine if this score passes its threshold
+      let threshold = 0.5; // Default threshold
+      if (name.toLowerCase().includes('micro_movement') || name.toLowerCase().includes('micro movement')) {
+        threshold = 0.5;
+      } else if (name.toLowerCase().includes('consistency') || name.toLowerCase().includes('3d')) {
+        threshold = 0.6;
+      } else if (name.toLowerCase().includes('blink')) {
+        threshold = 0.5;
+      } else if (name.toLowerCase().includes('challenge')) {
+        threshold = 0.7;
+      } else if (name.toLowerCase().includes('texture')) {
+        threshold = 0.5;
+      } else if (name.toLowerCase().includes('hand')) {
+        threshold = 0.6;
+      }
+
+      const passes = score >= threshold;
+
+      // Draw score name
+      ctx.font = font;
+      ctx.fillStyle = 'rgba(200, 200, 200, 1)';
+      ctx.textAlign = 'left';
+      ctx.fillText(name + ':', panelX + 10, yPos);
+
+      // Draw score value
+      ctx.textAlign = 'right';
+      ctx.fillText(score.toFixed(2), panelX + panelWidth - 40, yPos);
+
+      // Draw pass/fail indicator
+      const indicatorColor = passes ? 'rgba(0, 255, 0, 1)' : 'rgba(255, 0, 0, 1)';
+      ctx.beginPath();
+      ctx.arc(panelX + panelWidth - 20, yPos - 5, 5, 0, Math.PI * 2);
+      ctx.fillStyle = indicatorColor;
+      ctx.fill();
+
+      yPos += 30;
+    }
+
+    ctx.restore();
   }
 
   // Helper: format challenge names for display (e.g. "turn_head_left" -> "Turn Head Left")

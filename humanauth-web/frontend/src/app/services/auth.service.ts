@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { HttpClient, HttpHeaders } from "@angular/common/http";
+import { HttpClient, HttpHeaders, HttpErrorResponse } from "@angular/common/http";
 import { firstValueFrom } from "rxjs";
 
 export interface AuthResult {
@@ -143,6 +143,13 @@ export class AuthService {
       return response.data;
     } catch (error) {
       console.error("Failed to process frame:", error);
+
+      // Check if this is a rate limit error (HTTP 429)
+      if (error instanceof HttpErrorResponse && error.status === 429) {
+        console.warn("Rate limit exceeded. The application is sending requests too quickly.");
+        throw new Error("Rate limit exceeded. Please wait a moment before continuing.");
+      }
+
       throw new Error("Failed to process frame");
     }
   }

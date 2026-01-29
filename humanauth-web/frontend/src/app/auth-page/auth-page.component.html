@@ -84,6 +84,11 @@
       Stop
     </button>
 
+    <button class="ha-btn secondary" (click)="reload()" [disabled]="!running">
+      <span class="ha-btn-ic" aria-hidden="true">↻</span>
+      Reload
+    </button>
+
     <div class="ha-spacer"></div>
 
     <div class="ha-mini" *ngIf="result && !error">
