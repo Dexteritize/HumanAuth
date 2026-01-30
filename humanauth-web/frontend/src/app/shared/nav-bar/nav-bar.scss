@@ -16,19 +16,12 @@
   width: 32px;
   height: 32px;
   border-radius: 10px;
-  background: linear-gradient(135deg, rgba(114, 184, 255, 0.9), rgba(255, 140, 223, 0.9));
+  background-image: url('/HedgeOrange.png');
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
   box-shadow: 0 8px 20px rgba(0,0,0,0.25);
-  border: 1px solid rgba(255,255,255,0.25);
   position: relative;
-}
-
-.logo::before {
-  content: "";
-  position: absolute;
-  inset: 8px;
-  border-radius: 6px;
-  background: rgba(255,255,255,0.28);
-  filter: blur(0.2px);
 }
 
 .nav-brand span {
@@ -68,7 +61,7 @@
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(to right, rgba(114, 184, 255, 0.9), rgba(255, 140, 223, 0.9));
+  background: linear-gradient(to right, #ff6b35, #ffa500);
   border-radius: 2px;
 }
 

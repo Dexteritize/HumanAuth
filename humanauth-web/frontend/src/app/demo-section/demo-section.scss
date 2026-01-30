@@ -11,7 +11,7 @@
 h2 {
   font-size: clamp(1.6rem, 3vw, 2.2rem);
   margin-bottom: 20px;
-  background: linear-gradient(to right, rgba(114, 184, 255, 0.9), rgba(255, 140, 223, 0.9));
+  background: linear-gradient(to right, #e67e5f, #f4a460);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -27,8 +27,8 @@ h2 {
 }
 
 .demo-instructions {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(230, 126, 95, 0.06);
+  border: 1px solid rgba(230, 126, 95, 0.2);
   border-radius: 16px;
   padding: 25px;
   margin-bottom: 30px;
@@ -52,10 +52,10 @@ h2 {
 }
 
 .demo-auth-container {
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(230, 126, 95, 0.04);
   border-radius: 20px;
   padding: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 10px 30px rgba(209, 122, 140, 0.15);
 }
 
 /* Responsive adjustments */

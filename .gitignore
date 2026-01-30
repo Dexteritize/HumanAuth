@@ -1,0 +1,27 @@
+# Python virtual environment
+humanauth-web/backend/venv/
+venv/
+env/
+ENV/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+
+# OS files
+.DS_Store
+.DS_Store?
+
+# IDE
+.vscode/
+.idea/
+
+# Node modules (frontend)
+humanauth-web/frontend/node_modules/
+node_modules/
+
+# Build outputs
+humanauth-web/frontend/dist/
