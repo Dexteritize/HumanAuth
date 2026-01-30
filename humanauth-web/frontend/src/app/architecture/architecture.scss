@@ -15,6 +15,38 @@ h2 {
   font-weight: 700;
 }
 
+.architecture-intro {
+  text-align: center;
+  margin-bottom: var(--space-xl);
+}
+
+.intro-highlight {
+  font-size: var(--font-size-xl);
+  font-weight: 500;
+  line-height: 1.6;
+  color: var(--text-color);
+}
+
+.highlight-face {
+  color: #72b8ff;
+  font-weight: 600;
+}
+
+.highlight-hand {
+  color: #ff8cdf;
+  font-weight: 600;
+}
+
+.highlight-humans {
+  color: #6cffd6;
+  font-weight: 600;
+}
+
+.highlight-bots {
+  color: #ff6b6b;
+  font-weight: 600;
+}
+
 h3 {
   font-size: var(--font-size-xl);
   margin: 0 0 var(--space-md);

@@ -2,9 +2,8 @@
   <h2>HumanAuth System Architecture</h2>
 
   <div class="architecture-intro">
-    <p>
-      HumanAuth uses face and hand recognition to verify real humans versus bots or spoofing attempts.
-      This page outlines the system architecture from backend components to API and frontend integration.
+    <p class="intro-highlight">
+      <span class="highlight-face">Face</span> and <span class="highlight-hand">hand</span> recognition to verify <span class="highlight-humans">humans</span> vs. <span class="highlight-bots">bots</span>.
     </p>
   </div>
 
@@ -13,9 +12,7 @@
     
     <div class="flow-description">
       <p>
-        The frontend captures camera frames and sends them to the backend via the API.
-        The backend processes these frames using MediaPipe to detect faces and hands, verifying human presence
-        through interactive challenges.
+        Frontend captures frames → Backend processes with MediaPipe → Verifies via challenges.
       </p>
     </div>
 
@@ -113,22 +110,20 @@
           <h5>Demo Page</h5>
           <p class="card-desc">Reference implementation</p>
           <ul class="card-features">
-            <li>Camera access & frame capture</li>
+            <li>Camera & frame capture</li>
             <li>API communication</li>
-            <li>Challenge display & feedback</li>
-            <li>Complete authentication workflow</li>
+            <li>Challenge workflow</li>
           </ul>
         </div>
         
         <div class="integration-card external">
           <div class="card-icon">🌐</div>
           <h5>External Applications</h5>
-          <p class="card-desc">Connect your own app</p>
+          <p class="card-desc">Connect your app</p>
           <ul class="card-features">
-            <li>REST API with session management</li>
-            <li>Standard HTTP endpoints</li>
-            <li>CORS support for web apps</li>
-            <li>Standardized JSON responses</li>
+            <li>REST API endpoints</li>
+            <li>CORS support</li>
+            <li>JSON responses</li>
           </ul>
         </div>
       </div>
@@ -142,7 +137,7 @@
         <div class="component-icon">🔧</div>
         <h4>Flask Server (app.py)</h4>
         <p>
-          Built with Flask, providing REST API endpoints for frontend communication.
+          REST API endpoints for frontend communication.
         </p>
         <div class="code-example">
           <pre><code>Key components in app.py
@@ -157,7 +152,7 @@
         <div class="component-icon">🤖</div>
         <h4>Human Authentication Engine (human_auth.py)</h4>
         <p>
-          Core authentication logic using MediaPipe for face and hand landmark detection.
+          MediaPipe face and hand detection.
         </p>
         <div class="code-example">
           <pre><code>Key components in human_auth.py
@@ -174,7 +169,7 @@
           <div class="tech-icon">👤</div>
           <h5>Face Landmark Detection</h5>
           <p>
-            Tracks 468 3D points to analyze expressions, head pose, and micro-movements.
+            468 3D points for expressions, pose, micro-movements.
           </p>
           <div class="visual-indicator">
             <div class="landmark-dots">
@@ -188,7 +183,7 @@
           <div class="tech-icon">✋</div>
           <h5>Hand Landmark Detection</h5>
           <p>
-            Tracks 21 points per hand for gesture recognition and challenge verification.
+            21 points per hand for gestures and challenges.
           </p>
           <div class="visual-indicator">
             <div class="landmark-dots">
@@ -214,7 +209,7 @@
         </div>
         <h4>Angular Application</h4>
         <p>
-          Built with Angular, providing a responsive interface for the authentication process.
+          Responsive authentication interface.
         </p>
       </div>
 
@@ -223,14 +218,14 @@
           <div class="tech-icon">📹</div>
           <h5>Auth Page Component</h5>
           <p>
-            Handles UI for authentication, including camera preview and challenge display.
+            Camera preview and challenge UI.
           </p>
         </div>
         <div class="tech-item">
           <div class="tech-icon">📷</div>
           <h5>Camera Service</h5>
           <p>
-            Manages camera access and frame capture.
+            Camera access and capture.
           </p>
           <div class="code-example">
             <pre><code>Key methods
@@ -243,7 +238,7 @@
           <div class="tech-icon">🔐</div>
           <h5>Auth Service</h5>
           <p>
-            Handles API communication and session management.
+            API communication & sessions.
           </p>
           <div class="code-example">
             <pre><code>Key methods
@@ -265,27 +260,27 @@
         <div class="endpoint">
           <div class="endpoint-method get">GET</div>
           <h5>/api/config</h5>
-          <p>Returns API configuration</p>
+          <p>API configuration</p>
         </div>
         <div class="endpoint">
           <div class="endpoint-method post">POST</div>
           <h5>/api/sessions</h5>
-          <p>Creates a new authentication session</p>
+          <p>Create session</p>
         </div>
         <div class="endpoint">
           <div class="endpoint-method post">POST</div>
           <h5>/api/sessions/&#123;session_id&#125;/process</h5>
-          <p>Processes a frame and returns results</p>
+          <p>Process frame</p>
         </div>
         <div class="endpoint">
           <div class="endpoint-method post">POST</div>
           <h5>/api/sessions/&#123;session_id&#125;/reset</h5>
-          <p>Resets the current session</p>
+          <p>Reset session</p>
         </div>
         <div class="endpoint">
           <div class="endpoint-method post">POST</div>
           <h5>/api/verify</h5>
-          <p>One-time frame verification</p>
+          <p>One-time verification</p>
         </div>
       </div>
     </div>
@@ -302,7 +297,6 @@
             <div class="flow-number">1️⃣</div>
             <div class="flow-content">
               <h5>Initialize</h5>
-              <p>Load and initialize AuthService</p>
               <div class="flow-detail">
                 <code>auth.initialize(backendUrl)</code>
               </div>
@@ -313,7 +307,6 @@
             <div class="flow-number">2️⃣</div>
             <div class="flow-content">
               <h5>Start Camera</h5>
-              <p>Begin authentication process</p>
               <div class="flow-detail">
                 <code>cam.start(videoElement)</code>
               </div>
@@ -324,7 +317,6 @@
             <div class="flow-number">3️⃣</div>
             <div class="flow-content">
               <h5>Create Session</h5>
-              <p>Start authentication session</p>
               <div class="flow-detail">
                 <code>auth.startAuth()</code>
               </div>
@@ -335,7 +327,6 @@
             <div class="flow-number">4️⃣</div>
             <div class="flow-content">
               <h5>Process Frames</h5>
-              <p>Send frames for processing</p>
               <div class="flow-detail">
                 <code>auth.processFrame(frame)</code>
               </div>
@@ -346,7 +337,6 @@
             <div class="flow-number">5️⃣</div>
             <div class="flow-content">
               <h5>Complete Auth</h5>
-              <p>Verify human presence</p>
             </div>
           </div>
         </div>
@@ -409,9 +399,7 @@
     </div>
 
     <p>
-      The client initializes a session, captures camera frames, and sends them to the backend.
-      The backend analyzes these frames using MediaPipe, issues challenges, and verifies responses.
-      After completing all challenges, the system confirms human presence and returns an authentication result.
+      Client captures frames → Backend analyzes with MediaPipe → Issues challenges → Verifies responses → Returns auth result.
     </p>
   </div>
 
@@ -516,28 +504,28 @@
           <div class="privacy-feature">
             <div class="privacy-content">
               <h5>Temporary Processing</h5>
-              <p>Real-time processing with no long-term storage</p>
+              <p>No long-term storage</p>
             </div>
           </div>
 
           <div class="privacy-feature">
             <div class="privacy-content">
               <h5>Server-Side Security</h5>
-              <p>Sensitive processing on secure servers</p>
+              <p>Secure processing</p>
             </div>
           </div>
 
           <div class="privacy-feature">
             <div class="privacy-content">
               <h5>Anonymous Auth</h5>
-              <p>No personal identification required</p>
+              <p>No personal ID required</p>
             </div>
           </div>
 
           <div class="privacy-feature">
             <div class="privacy-content">
               <h5>Session Isolation</h5>
-              <p>Data deleted after session completion</p>
+              <p>Auto-delete after session</p>
             </div>
           </div>
         </div>
