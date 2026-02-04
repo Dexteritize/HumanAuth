@@ -1,6 +1,6 @@
 # HumanAuth
 
-HumanAuth is a web-based human authentication demo that combines real-time face and hand landmark detection, challenge-response liveness checks, and low-latency WebSocket communication. This repository contains the frontend (Angular) and backend (Python) components, model files for MediaPipe-style processing, and helper scripts to run the demo locally.
+HumanAuth is a web-based human authentication demo that combines real-time face and hand landmark detection, challenge-response liveness checks, and low-latency WebSocket communication. This repository contains the frontend (Angular) and backend (Python) components, model files for MediaPipe-style processing, and helper scripts to run the demo. The project is located in the `humanauth-web` directory and should be run using the `start.sh` script.
 
 ## Table of Contents
 
@@ -76,15 +76,34 @@ Start script
 
 ## 5. Local Setup \& Quick Start
 
-Recommended quick start from repository root:
+**Important:** The recommended way to run HumanAuth is using the `start.sh` script in the `humanauth-web` directory. This script handles all necessary setup, dependency installation, and server startup automatically.
+
+From repository root:
 
 1. Navigate to `humanauth-web`:
-   - `cd humanauth-web`
+   ```
+   cd humanauth-web
+   ```
 2. Make the start script executable and run it:
-   - `chmod +x start.sh`
-   - `./start.sh`
+   ```
+   chmod +x start.sh
+   ./start.sh
+   ```
+3. Open your browser and navigate to `http://localhost:4200`
 
-Manual startup:
+The script will:
+- Check for required dependencies (Python 3, Node.js, npm)
+- Verify model files exist
+- Set up a Python virtual environment if needed
+- Install/update all dependencies
+- Start both backend and frontend servers
+- Provide clean shutdown with Ctrl+C
+
+**Note:** The `localdemo` directory in the repository root should be ignored. Use the `humanauth-web` directory and its `start.sh` script instead.
+
+### Alternative: Manual Startup
+
+If you need to start the servers manually (not recommended for most users):
 
 Backend
 - `cd humanauth-web/backend`
@@ -98,8 +117,6 @@ Frontend
 - `cd humanauth-web/frontend`
 - `npm install`
 - `npm start` (serves on `http://localhost:4200`)
-
-Ensure both servers are running; open `http://localhost:4200`.
 
 ## 6. Configuration
 
@@ -147,25 +164,33 @@ Quality vs latency tradeoffs
 
 ## 11. Project Layout
 
-A representative layout:
+Current project layout:
 
 - `HumanAuth/` \- repository root
-  - `humanauth-web/`
-    - `start.sh` \- start orchestration script
-    - `frontend/`
+  - `humanauth-web/` \- **Main project directory (use this)**
+    - `start.sh` \- start orchestration script (recommended way to run the project)
+    - `frontend/` \- Angular application
       - `src/`
         - `app/`
-          - `auth-page/`
+          - `auth-page/` \- Main authentication page
             - `auth-page.component.ts`
             - `auth-page.component.scss`
+            - `auth-page.component.html`
+          - `architecture/` \- Architecture explanation page
+          - `authentication-explanation/` \- Authentication details page
+          - `home-page/` \- Landing page
           - `services/`
-            - `camera.service.ts`
+            - `camera.service.ts` \- Camera handling
+            - `auth.service.ts` \- Authentication logic
       - `package.json`
+      - `public/` \- Static assets including HedgeOrange.png favicon
     - `backend/`
-      - `app.py`
-      - `requirements.txt`
-      - `face_landmarker.task`
-      - `hand_landmarker.task`
+      - `app.py` \- Main server application
+      - `human_auth.py` \- Authentication engine
+      - `requirements.txt` \- Python dependencies
+      - `face_landmarker.task` \- Face detection model
+      - `hand_landmarker.task` \- Hand detection model
+  - `localdemo/` \- **Ignore this directory** (deprecated)
   - `LICENSE`
   - `README.md` \- (this file)
 
