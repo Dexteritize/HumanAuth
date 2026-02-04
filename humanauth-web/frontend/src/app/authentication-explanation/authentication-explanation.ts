@@ -3,11 +3,11 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
 @Component({
-  selector: 'app-vendor-integration',
+  selector: 'app-authentication-explanation',
   imports: [CommonModule, RouterLink],
-  templateUrl: './vendor-integration.html',
-  styleUrl: './vendor-integration.scss',
+  templateUrl: './authentication-explanation.html',
+  styleUrl: './authentication-explanation.scss',
 })
-export class VendorIntegration {
+export class AuthenticationExplanation {
   // No special functionality needed for this component
 }

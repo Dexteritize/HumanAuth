@@ -728,119 +728,6 @@ li {
   margin-bottom: 0;
 }
 
-/* Simplified Flow diagrams */
-.flow-diagram-container {
-  display: flex;
-  gap: var(--space-lg);
-  margin: var(--space-lg) 0;
-  flex-wrap: wrap;
-}
-
-.flow-column {
-  flex: 1;
-  min-width: 320px;
-}
-
-.flow-column h4 {
-  text-align: center;
-  margin-bottom: var(--space-md);
-  padding-bottom: var(--space-xs);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  color: var(--text-color);
-}
-
-.flow-column.demo h4 {
-  color: #e67e5f;
-}
-
-.flow-column.vendor h4 {
-  color: #f4a460;
-}
-
-.flow-diagram {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: var(--space-md) 0;
-  gap: var(--space-sm);
-}
-
-.flow-step {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-sm);
-  background: rgba(230, 126, 95, 0.06);
-  border: 1px solid rgba(230, 126, 95, 0.2);
-  border-radius: var(--radius-md);
-  padding: var(--space-md);
-  width: 100%;
-}
-
-.flow-column.demo .flow-step {
-  border-left: 3px solid #e67e5f;
-}
-
-.flow-column.vendor .flow-step {
-  border-left: 3px solid #f4a460;
-}
-
-.flow-number {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 40px;
-  height: 40px;
-  font-size: 1.5rem;
-  flex-shrink: 0;
-}
-
-.flow-column.demo .flow-number {
-  background: var(--primary-color);
-}
-
-.flow-column.vendor .flow-number {
-  background: var(--secondary-color);
-}
-
-.flow-content {
-  flex: 1;
-}
-
-.flow-content h5 {
-  margin: 0 0 var(--space-xs);
-  font-size: var(--font-size-md);
-}
-
-.flow-content p {
-  margin: 0 0 var(--space-xs);
-  font-size: var(--font-size-sm);
-}
-
-.flow-detail {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: var(--radius-sm);
-  padding: var(--space-xs);
-  margin-top: var(--space-xs);
-  font-size: var(--font-size-xs);
-}
-
-.flow-detail code {
-  display: block;
-  font-family: 'Courier New', monospace;
-  color: var(--text-color);
-  margin-bottom: var(--space-xs);
-}
-
-.flow-detail span {
-  color: var(--muted-color);
-  font-size: var(--font-size-xs);
-}
-
-.flow-arrow {
-  color: var(--muted-color);
-  font-size: var(--font-size-xl);
-  margin: 0;
-}
 
 /* Backend flow diagram - simplified */
 .backend-flow {
@@ -1249,25 +1136,12 @@ li {
     margin: var(--space-sm) 0;
   }
 
-  /* Flow diagram responsive adjustments */
-  .flow-step {
-    max-width: 100%;
-    padding: var(--space-sm);
-  }
 
   .integration-row {
     flex-direction: column;
     gap: var(--space-md);
   }
 
-  .flow-diagram-container {
-    flex-direction: column;
-    gap: var(--space-lg);
-  }
-
-  .flow-column {
-    min-width: 100%;
-  }
 
   /* Backend flow responsive adjustments */
   .backend-flow-diagram {
@@ -1334,19 +1208,6 @@ li {
     padding: var(--space-sm);
   }
 
-  .flow-step {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
-
-  .flow-number {
-    margin-bottom: var(--space-xs);
-  }
-
-  .flow-content {
-    width: 100%;
-  }
 
   .defense-matrix th,
   .defense-matrix td {

@@ -11,23 +11,6 @@
         <p class="ha-sub">Align your face in the frame. Keep lighting steady for best results.</p>
       </div>
     </div>
-
-    <div class="ha-badges" *ngIf="result">
-      <span class="ha-badge" [class.ok]="result.authenticated" [class.warn]="!result.authenticated">
-        <span class="ha-dot" aria-hidden="true"></span>
-        {{ result.authenticated ? "Authenticated" : "Authenticating" }}
-      </span>
-      <span class="ha-badge">
-        Confidence: {{ (result.confidence * 100) | number:'1.0-0' }}%
-      </span>
-    </div>
-
-    <div class="ha-badges" *ngIf="!result">
-      <span class="ha-badge">
-        <span class="ha-dot idle" aria-hidden="true"></span>
-        Ready
-      </span>
-    </div>
   </div>
 
   <!-- Challenge card removed from outside the video frame as per requirements -->
@@ -50,19 +33,6 @@
           <div class="ha-hint-body">Press <b>Start</b> to begin authentication.</div>
         </div>
 
-        <!-- In-video challenge card - only shown when running -->
-        <div class="ha-in-video-challenge" *ngIf="running && result && result.details">
-          <div class="ha-challenge-title">CURRENT CHALLENGE</div>
-          <div class="ha-challenge-body">
-            <ng-container *ngIf="result.details['current_challenge']; else testPlaceholder">
-              {{ formatChallengeName(result.details['current_challenge']) }}
-            </ng-container>
-            <ng-template #testPlaceholder>Look Left</ng-template>
-          </div>
-          <div class="ha-challenge-progress">
-            Progress: {{ result.details['successful_challenges_count'] || 0 }} / {{ result.details['required_challenges'] || 3 }}
-          </div>
-        </div>
 
         <div class="ha-live" *ngIf="running">
           <span class="ha-pulse" aria-hidden="true"></span>
@@ -91,49 +61,10 @@
 
     <div class="ha-spacer"></div>
 
-    <div class="ha-mini" *ngIf="result && !error">
-      <div class="ha-mini-msg">{{ result.message }}</div>
-    </div>
-
     <div class="ha-mini error" *ngIf="error">
       <div class="ha-mini-msg">{{ error }}</div>
     </div>
   </div>
 
-  <!-- Detail card -->
-  <div class="ha-detail" *ngIf="result && !error">
-    <div class="ha-detail-row">
-      <div class="ha-kv">
-        <div class="ha-k">Status</div>
-        <div class="ha-v" [class.ok]="result.authenticated" [class.warn]="!result.authenticated">
-          {{ result.authenticated ? "Authenticated" : "Authenticating" }}
-        </div>
-      </div>
-
-      <div class="ha-kv">
-        <div class="ha-k">Confidence</div>
-        <div class="ha-v">{{ (result.confidence * 100) | number:'1.0-0' }}%</div>
-      </div>
-    </div>
-
-    <div class="ha-meter">
-      <div class="ha-meter-label">Confidence meter</div>
-      <div
-        class="ha-meter-track"
-        role="progressbar"
-        [attr.aria-valuenow]="(result.confidence * 100) | number:'1.0-0'"
-        aria-valuemin="0"
-        aria-valuemax="100"
-      >
-        <div
-          class="ha-meter-fill"
-          [style.width.%]="(result.confidence || 0) * 100"
-          [class.ok]="result.authenticated"
-        ></div>
-      </div>
-    </div>
-
-    <p class="ha-message">{{ result.message }}</p>
-  </div>
 
 </section>

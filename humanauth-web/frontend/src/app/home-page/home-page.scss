@@ -233,8 +233,27 @@
 
 .benefits-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 25px;
+}
+
+/* Center the last card when it's alone in a row */
+.benefits-grid .benefit-card:last-child:nth-child(3n-2) {
+  grid-column: 2;
+}
+
+/* Responsive adjustments for the benefits grid */
+@media (max-width: 992px) {
+  .benefits-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Center the last card when it's alone in a row */
+  .benefits-grid .benefit-card:last-child:nth-child(2n-1) {
+    grid-column: 1 / span 2;
+    max-width: 50%;
+    margin: 0 auto;
+  }
 }
 
 .benefit-card {
