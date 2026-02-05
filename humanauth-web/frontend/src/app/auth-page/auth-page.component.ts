@@ -79,7 +79,7 @@ export class AuthPageComponent implements OnDestroy {
   }
 
   async start() {
-    // Set running flag immediately so UI updates right away
+    // Set running flag immediately so UI updates right away.
     this.running = true;
     
     // Reset any previous UI state
