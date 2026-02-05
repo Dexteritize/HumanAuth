@@ -34,20 +34,13 @@
   width: 28px;
   height: 28px;
   border-radius: 8px;
-  background: linear-gradient(135deg, rgba(114, 184, 255, 0.8), rgba(255, 140, 223, 0.8));
+  background-image: url('/HedgeOrange.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   box-shadow: 0 6px 15px rgba(0,0,0,0.2);
-  border: 1px solid rgba(255,255,255,0.2);
   position: relative;
   margin-bottom: 10px;
-}
-
-.footer-logo::before {
-  content: "";
-  position: absolute;
-  inset: 7px;
-  border-radius: 5px;
-  background: rgba(255,255,255,0.25);
-  filter: blur(0.2px);
 }
 
 .footer-section ul {

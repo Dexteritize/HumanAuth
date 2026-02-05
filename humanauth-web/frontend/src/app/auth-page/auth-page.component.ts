@@ -79,6 +79,9 @@ export class AuthPageComponent implements OnDestroy {
   }
 
   async start() {
+    // Set running flag immediately so UI updates right away.
+    this.running = true;
+    
     // Reset any previous UI state
     this.error = undefined;
     this.result = undefined; // Clear previous authentication result
@@ -107,7 +110,6 @@ export class AuthPageComponent implements OnDestroy {
       canvasEl.width = videoEl.videoWidth;
       canvasEl.height = videoEl.videoHeight;
 
-      this.running = true;
       this.loop();
     } catch (e: any) {
       this.error = e.message;
@@ -123,6 +125,7 @@ export class AuthPageComponent implements OnDestroy {
 
     // Clear transient error state when stopping
     this.error = undefined;
+    this.result = undefined; // Clear authentication result display
 
     // Cancel any pending animation frame
     if (this.animationFrameId) {
@@ -130,7 +133,20 @@ export class AuthPageComponent implements OnDestroy {
       this.animationFrameId = undefined;
     }
 
+    // Stop camera and clear video feed
     this.cam.stop();
+    
+    // Clear the video source to immediately stop the feed
+    const videoEl = this.video.nativeElement;
+    videoEl.srcObject = null;
+    
+    // Clear the canvas overlay
+    const canvasEl = this.canvas.nativeElement;
+    const ctx = canvasEl.getContext('2d');
+    if (ctx) {
+      ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+    }
+    
     this.auth.disconnect();
   }
 
