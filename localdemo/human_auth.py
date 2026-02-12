@@ -98,7 +98,7 @@ HAND_CONNECTIONS = [
 
 # Challenge types - restricted to only three specific challenges as requested
 CHALLENGES = [
-    "RAISE_EYEBROWS",      # Raise eyebrows
+    "BLINK",               # Blink eyes
     "SHOW_PEACE_SIGN",     # Make a peace sign with hand
     "SHOW_FIVE_FINGERS"    # Show all five fingers (open hand)
 ]
@@ -195,11 +195,11 @@ class HumanAuth:
         # Weights for different detection methods (adjusted to include hand detection)
         self.weights = {
             "3d_consistency": 0.20,
-            "micro_movement": 0.10,
+            "micro_movement": 0.0,     # Set to 0 to remove micromovements
             "blink_pattern": 0.15,
-            "challenge_response": 0.25,
+            "challenge_response": 0.30, # Increased to compensate for removed micro_movement
             "texture_analysis": 0.10,
-            "hand_detection": 0.20    # New weight for hand detection
+            "hand_detection": 0.25     # Increased to compensate for removed micro_movement
         }
     
     def _find_face_model(self) -> str:
@@ -810,19 +810,11 @@ class HumanAuth:
         # Detect hands
         hand_detected, hand_landmarks, hand_gesture = self._detect_hand(frame_bgr)
         
-        # Initialize result details
+        # Initialize result details - simplified to only include essential information
         details = {
             "face_detected": False,
-            "blink_detected": False,
-            "blink_rate": 0.0,
-            "micro_movement_score": 0.0,
-            "3d_consistency_score": 0.0,
-            "blink_pattern_score": 0.0,
-            "challenge_response_score": 0.0,
-            "texture_score": 0.0,
             "hand_detected": hand_detected,
             "hand_gesture": hand_gesture,
-            "hand_detection_score": 0.0,
             "current_challenge": self.current_challenge,
             "challenge_completed": self.challenge_completed,
             "successful_challenges_count": self.successful_challenges_count,
@@ -834,7 +826,6 @@ class HumanAuth:
         
         # Calculate hand detection score
         hand_detection_score = self._calculate_hand_detection_score()
-        details["hand_detection_score"] = hand_detection_score
         
         # If no face is detected but hand is detected, we can still authenticate with lower confidence
         if not detection_result.face_landmarks:
@@ -882,7 +873,6 @@ class HumanAuth:
                             # Natural response time
                             challenge_response_score = 1.0
                 
-                details["challenge_response_score"] = challenge_response_score
                 
                 # Calculate confidence for hand-only authentication
                 confidence = (
@@ -908,31 +898,11 @@ class HumanAuth:
         landmarks = detection_result.face_landmarks[0]
         blendshapes = detection_result.face_blendshapes[0] if detection_result.face_blendshapes else None
         
-        # Estimate head pose
-        yaw, pitch = self._estimate_head_pose(landmarks)
-        
-        # Update face history
-        now = time.time()
-        self.face_history.append((now, landmarks, yaw, pitch))
-        
-        # Calculate depth ratios for 3D consistency
-        depth_ratios = self._calculate_depth_ratios(landmarks)
-        if depth_ratios:
-            self.depth_ratios_history.append(depth_ratios)
-        
-        # Detect blink
-        blink_detected = self._detect_blink(landmarks)
-        
         # Update details
         details["face_detected"] = True
-        details["blink_detected"] = blink_detected
-        details["blink_rate"] = self.blink_rate
         
-        # Calculate scores for different detection methods
-        micro_movement_score = self._detect_micro_movements()
-        consistency_score = self._check_3d_consistency()
-        blink_pattern_score = self._check_blink_pattern()
-        texture_score = self._analyze_texture(frame_bgr)
+        # Detect blink for challenge purposes only
+        blink_detected = self._detect_blink(landmarks)
         
         # Store current landmarks for drawing
         self.current_landmarks = landmarks
@@ -967,22 +937,11 @@ class HumanAuth:
                     # Natural response time
                     challenge_response_score = 1.0
         
-        # Update details with scores
-        details["micro_movement_score"] = micro_movement_score
-        details["3d_consistency_score"] = consistency_score
-        details["blink_pattern_score"] = blink_pattern_score
-        details["challenge_response_score"] = challenge_response_score
-        details["texture_score"] = texture_score
-        
-        # Calculate overall confidence
+        # Calculate overall confidence - simplified to only use challenge response and hand detection
         confidence = (
-            self.weights["micro_movement"] * micro_movement_score +
-            self.weights["3d_consistency"] * consistency_score +
-            self.weights["blink_pattern"] * blink_pattern_score +
             self.weights["challenge_response"] * challenge_response_score +
-            self.weights["texture_analysis"] * texture_score +
             self.weights["hand_detection"] * hand_detection_score
-        )
+        ) / (self.weights["challenge_response"] + self.weights["hand_detection"])
         
         # Update authentication state
         self.auth_confidence = confidence
@@ -1049,19 +1008,27 @@ class HumanAuth:
             
         h, w = frame.shape[:2]
         
-        # Draw eyes
-        self._draw_landmark_connections(frame, landmarks, LEFT_EYE, (0, 255, 255), 2)  # Yellow
-        self._draw_landmark_connections(frame, landmarks, RIGHT_EYE, (0, 255, 255), 2)
+        # Draw individual landmark points like in the web version
+        for i, lm in enumerate(landmarks):
+            x, y = int(lm.x * w), int(lm.y * h)
+            
+            # Draw point with bright green color like in web version
+            cv2.circle(frame, (x, y), 2, (0, 255, 0), -1)
         
-        # Draw eyebrows
-        self._draw_landmark_connections(frame, landmarks, LEFT_EYEBROW, (0, 255, 0), 2)  # Green
+        # Draw all connections in bright green like in the web version
+        # Eyes
+        self._draw_landmark_connections(frame, landmarks, LEFT_EYE, (0, 255, 0), 2)
+        self._draw_landmark_connections(frame, landmarks, RIGHT_EYE, (0, 255, 0), 2)
+        
+        # Eyebrows
+        self._draw_landmark_connections(frame, landmarks, LEFT_EYEBROW, (0, 255, 0), 2)
         self._draw_landmark_connections(frame, landmarks, RIGHT_EYEBROW, (0, 255, 0), 2)
         
-        # Draw mouth
-        self._draw_landmark_connections(frame, landmarks, MOUTH_OUTER, (0, 0, 255), 2)  # Red
+        # Mouth
+        self._draw_landmark_connections(frame, landmarks, MOUTH_OUTER, (0, 255, 0), 2)
         
-        # Draw face oval
-        self._draw_landmark_connections(frame, landmarks, FACE_OVAL, (255, 255, 255), 1)  # White
+        # Face oval
+        self._draw_landmark_connections(frame, landmarks, FACE_OVAL, (0, 255, 0), 2)
     
     def _draw_landmark_connections(self, frame, landmarks, connections, color, thickness=1):
         """
@@ -1102,7 +1069,26 @@ class HumanAuth:
             
         h, w = frame.shape[:2]
         
-        # Draw hand connections
+        # Draw landmark points with different colors for different fingers like in web version
+        for i, lm in enumerate(landmarks):
+            x, y = int(lm.x * w), int(lm.y * h)
+            
+            # Different colors for different finger landmarks (matching web version)
+            if i <= 4:  # Thumb
+                color = (0, 0, 255)  # Red (BGR)
+            elif i <= 8:  # Index finger
+                color = (0, 255, 0)  # Green
+            elif i <= 12:  # Middle finger
+                color = (255, 0, 255)  # Magenta
+            elif i <= 16:  # Ring finger
+                color = (255, 255, 0)  # Yellow
+            else:  # Pinky
+                color = (0, 255, 255)  # Cyan
+                
+            # Larger points like in web version
+            cv2.circle(frame, (x, y), 4, color, -1)
+        
+        # Draw hand connections with different colors for different fingers
         for connection in HAND_CONNECTIONS:
             start_idx, end_idx = connection
             if start_idx < len(landmarks) and end_idx < len(landmarks):
@@ -1112,27 +1098,20 @@ class HumanAuth:
                 start_point = (int(start_lm.x * w), int(start_lm.y * h))
                 end_point = (int(end_lm.x * w), int(end_lm.y * h))
                 
-                cv2.line(frame, start_point, end_point, (0, 255, 0), 2, cv2.LINE_AA)
-        
-        # Draw landmark points
-        for i, lm in enumerate(landmarks):
-            x, y = int(lm.x * w), int(lm.y * h)
-            
-            # Different colors for different finger landmarks
-            if i == 0:  # Wrist
-                color = (255, 0, 0)  # Blue
-            elif i <= 4:  # Thumb
-                color = (0, 0, 255)  # Red
-            elif i <= 8:  # Index finger
-                color = (0, 255, 0)  # Green
-            elif i <= 12:  # Middle finger
-                color = (255, 0, 255)  # Magenta
-            elif i <= 16:  # Ring finger
-                color = (255, 255, 0)  # Cyan
-            else:  # Pinky
-                color = (0, 255, 255)  # Yellow
+                # Determine color based on which finger the connection belongs to
+                if start_idx <= 4 or end_idx <= 4:  # Thumb
+                    color = (0, 0, 255)  # Red (BGR)
+                elif start_idx <= 8 or end_idx <= 8:  # Index finger
+                    color = (0, 255, 0)  # Green
+                elif start_idx <= 12 or end_idx <= 12:  # Middle finger
+                    color = (255, 0, 255)  # Magenta
+                elif start_idx <= 16 or end_idx <= 16:  # Ring finger
+                    color = (255, 255, 0)  # Yellow
+                else:  # Pinky
+                    color = (0, 255, 255)  # Cyan
                 
-            cv2.circle(frame, (x, y), 3, color, -1)
+                # Thicker lines like in web version
+                cv2.line(frame, start_point, end_point, color, 3, cv2.LINE_AA)
     
     def draw_debug(self, frame, result: AuthResult):
         """

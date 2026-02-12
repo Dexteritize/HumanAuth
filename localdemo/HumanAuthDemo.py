@@ -263,44 +263,36 @@ class HumanAuthDemo:
         """Draw the user interface on the frame."""
         h, w = frame.shape[:2]
         
-        # Create a semi-transparent overlay for better readability
-        overlay = frame.copy()
-        cv2.rectangle(overlay, (0, 0), (w, h), (10, 10, 30), -1)
-        cv2.addWeighted(overlay, 0.2, frame, 0.8, 0, frame)
+        # No background overlay - keep the original frame completely clean
         
-        # Draw authentication status
+        # Draw simplified authentication status
         self._draw_auth_status(frame, result)
         
-        # Draw challenge information
+        # Draw simplified challenge information
         self._draw_challenge_info(frame, result)
 
-        # Draw debug information if enabled
-        if self.show_debug:
-            self.auth.draw_debug(frame, result)
+        # Always draw hand and face landmarks like in the web version
+        self.auth.draw_debug(frame, result)
 
         # Draw help overlay if enabled
         if self.show_help:
             self._draw_help(frame)
-
-        # Draw authentication progress bar
-        self._draw_auth_progress(frame, result)
         
-        # Draw controls hint at the bottom
-        controls_text = "Controls:  'h' - Help  |  'd' - Debug  |  'r' - Restart  |  'ESC' - Exit"
-        controls_size = cv2.getTextSize(controls_text, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)[0]
+        # Draw minimal controls hint at the bottom - just small text
+        controls_text = "h:Help | r:Restart | ESC:Exit"
         cv2.putText(
             frame,
             controls_text,
-            (w // 2 - controls_size[0] // 2, h - 10),
+            (10, h - 10),
             cv2.FONT_HERSHEY_SIMPLEX,
-            0.5,
-            (200, 200, 200),
+            0.4,
+            (150, 150, 150),
             1,
             cv2.LINE_AA,
         )
 
     def _draw_challenge_info(self, frame, result: AuthResult):
-        """Draw information about the current challenge."""
+        """Draw extremely simplified information about the current challenge."""
         h, w = frame.shape[:2]
         
         # Get challenge information from result details
@@ -312,34 +304,19 @@ class HumanAuthDemo:
         if not current_challenge:
             return
             
-        # Draw challenge section background
-        section_height = 80
+        # Draw minimal challenge section
         section_y = 70  # Just below the status banner
-        cv2.rectangle(frame, (0, section_y), (w, section_y + section_height), (40, 40, 40), -1)
-        
-        # Draw section title
-        cv2.putText(
-            frame,
-            "Current Challenge:",
-            (20, section_y + 25),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.7,
-            (200, 200, 255),
-            1,
-            cv2.LINE_AA,
-        )
-        
-        # Draw challenge name with status indicator
-        challenge_color = (0, 255, 0) if challenge_completed else (0, 165, 255)
-        challenge_status = "✓ COMPLETED" if challenge_completed else "IN PROGRESS"
         
         # Format challenge name for display (replace underscores with spaces, capitalize)
         display_challenge = current_challenge.replace("_", " ").title()
         
+        # Draw challenge name with status indicator - even more minimal
+        challenge_color = (0, 255, 0) if challenge_completed else (0, 165, 255)
+        
         cv2.putText(
             frame,
-            f"{display_challenge} - {challenge_status}",
-            (20, section_y + 55),
+            display_challenge,
+            (20, section_y + 25),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.8,
             challenge_color,
@@ -347,93 +324,29 @@ class HumanAuthDemo:
             cv2.LINE_AA,
         )
         
-        # Draw challenge progress (X of Y challenges completed)
-        progress_text = f"Progress: {successful_challenges}/{required_challenges} Challenges Completed"
-        cv2.putText(
-            frame,
-            progress_text,
-            (w - 300, section_y + 40),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.7,
-            (255, 255, 255),
-            1,
-            cv2.LINE_AA,
-        )
-        
-        # Draw challenge progress circles
-        circle_radius = 8
-        circle_spacing = 25
-        circle_y = section_y + 60
-        circle_x_start = w - 300 + len(progress_text) // 2
-        
+        # Draw minimal progress indicator - just dots
         for i in range(required_challenges):
-            x = circle_x_start + i * circle_spacing
+            circle_x = w - 50 - (required_challenges - i - 1) * 20
+            circle_y = section_y + 25
             
-            # Draw circle outline
-            cv2.circle(frame, (x, circle_y), circle_radius, (255, 255, 255), 1)
-            
-            # Fill circle if challenge is completed
+            # Draw filled circle if challenge is completed, empty otherwise
             if i < successful_challenges:
-                cv2.circle(frame, (x, circle_y), circle_radius - 2, (0, 255, 0), -1)
+                cv2.circle(frame, (circle_x, circle_y), 5, (0, 255, 0), -1)
+            else:
+                cv2.circle(frame, (circle_x, circle_y), 5, (255, 255, 255), 1)
 
     def _draw_auth_status(self, frame, result: AuthResult):
-        """Draw authentication status on the frame."""
+        """Draw extremely simplified authentication status on the frame."""
         h, w = frame.shape[:2]
 
-        # Draw authentication banner at the top
-        banner_height = 60
+        # Draw minimal authentication indicator at the top
+        banner_height = 10  # Much thinner banner
         
-        # Gradient color based on confidence
-        if result.authenticated:
-            banner_color = (0, 150, 0)  # Green for authenticated
-        else:
-            # Gradient from red to orange based on confidence
-            r = 150
-            g = int(150 * result.confidence)
-            b = 0
-            banner_color = (b, g, r)
-            
+        # Simple color based on authentication status
+        banner_color = (0, 200, 0) if result.authenticated else (0, 0, 200)  # Brighter Green or Blue
         cv2.rectangle(frame, (0, 0), (w, banner_height), banner_color, -1)
 
-        # Draw authentication status text
-        status_text = "AUTHENTICATED" if result.authenticated else "AUTHENTICATION IN PROGRESS"
-        cv2.putText(
-            frame,
-            status_text,
-            (w // 2 - 150, banner_height // 2 + 10),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            1.0,
-            (255, 255, 255),
-            2,
-            cv2.LINE_AA,
-        )
-
-        # Draw authentication duration if authenticated
-        if self.authenticated and self.auth_duration > 0:
-            duration_text = f"Duration: {self.auth_duration:.1f}s"
-            cv2.putText(
-                frame,
-                duration_text,
-                (w - 200, banner_height // 2 + 10),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.6,
-                (255, 255, 255),
-                1,
-                cv2.LINE_AA,
-            )
-        
-        # Draw confidence percentage on the left
-        confidence_text = f"Confidence: {result.confidence * 100:.1f}%"
-        cv2.putText(
-            frame,
-            confidence_text,
-            (20, banner_height // 2 + 10),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.7,
-            (255, 255, 255),
-            1,
-            cv2.LINE_AA,
-        )
+        # No text - just a colored indicator line at the top
 
     def _draw_auth_progress(self, frame, result: AuthResult):
         """Draw authentication progress bar on the frame."""
