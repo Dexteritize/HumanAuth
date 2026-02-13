@@ -48,7 +48,7 @@ logger = logging.getLogger("humanauth-backend")
 # Assume this file is in backend/ and human_auth.py + .task files are also in backend/
 BACKEND_DIR = Path(__file__).resolve().parent
 # Define the path to the frontend build output directory
-FRONTEND_DIR = (BACKEND_DIR.parent / "frontend" / "dist" / "frontend").resolve()
+FRONTEND_DIR = (BACKEND_DIR.parent / "frontend" / "dist" / "frontend" / "browser").resolve()
 import sys
 
 if str(BACKEND_DIR) not in sys.path:
