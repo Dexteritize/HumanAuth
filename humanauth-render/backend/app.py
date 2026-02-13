@@ -244,8 +244,8 @@ def validate_request_json(required_fields=None):
 # ------------------------------------------------------------------------------
 # Routes
 # ------------------------------------------------------------------------------
-@app.route("/", methods=["GET"])
-def index():
+@app.route("/api", methods=["GET"])
+def api_index():
     frontend_url = os.environ.get("FRONTEND_URL", "http://localhost:4200")
     return jsonify(
         {
