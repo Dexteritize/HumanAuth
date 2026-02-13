@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  backendUrl: process.env['BACKEND_URL'] || 'https://humanauth-backend.onrender.com'
+  backendUrl: ''  // Empty string will make it use relative URLs, which will work when deployed together
 };
