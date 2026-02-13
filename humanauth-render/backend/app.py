@@ -246,7 +246,8 @@ def validate_request_json(required_fields=None):
 # ------------------------------------------------------------------------------
 @app.route("/api", methods=["GET"])
 def api_index():
-    frontend_url = os.environ.get("FRONTEND_URL", "http://localhost:4200")
+    # Use Render's external URL if available, otherwise fall back to FRONTEND_URL or localhost
+    frontend_url = os.environ.get("RENDER_EXTERNAL_URL", os.environ.get("FRONTEND_URL", "http://localhost:4200"))
     return jsonify(
         {
             "name": "HumanAuth Web Demo API",
@@ -296,9 +297,16 @@ def get_frontend_config():
     """
     # For development only - in production, API keys should be managed securely
     # and not exposed directly to the frontend
+    
+    # Use Render's external URL if available, otherwise fall back to request.url_root
+    base_url = os.environ.get("RENDER_EXTERNAL_URL", request.url_root)
+    # Ensure base_url ends with a slash
+    if not base_url.endswith('/'):
+        base_url += '/'
+        
     return jsonify({
         "apiKey": API_KEY,
-        "apiUrl": request.url_root + "api/v1"
+        "apiUrl": base_url + "api/v1"
     })
 
 # ------------------------------------------------------------------------------
