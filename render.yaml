@@ -4,7 +4,6 @@ services:
     name: humanauth-backend
     env: python
     plan: free
-    rootDir: humanauth-render
     buildCommand: pip install -r backend/requirements.txt
     startCommand: cd backend && python app.py
     envVars:
@@ -21,7 +20,6 @@ services:
   - type: web
     name: humanauth-frontend
     env: static
-    rootDir: humanauth-render
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: ./frontend/dist/frontend
     routes:
