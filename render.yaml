@@ -1,0 +1,33 @@
+services:
+  # Backend service
+  - type: web
+    name: humanauth-backend
+    env: python
+    plan: free
+    rootDir: humanauth-render
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: cd backend && python app.py
+    envVars:
+      - key: PORT
+        value: 8000
+      - key: API_KEY
+        generateValue: true
+      - key: SECRET_KEY
+        generateValue: true
+      - key: PYTHON_VERSION
+        value: 3.9.0
+    
+  # Frontend service
+  - type: web
+    name: humanauth-frontend
+    env: static
+    rootDir: humanauth-render
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: ./frontend/dist/frontend
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: NODE_VERSION
+        value: 20.x
