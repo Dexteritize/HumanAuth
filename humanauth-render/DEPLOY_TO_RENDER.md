@@ -35,6 +35,7 @@ Blueprint deployment is the easiest way to deploy HumanAuth as it automatically 
 
 3. **Configure the Blueprint**
    - Render will automatically detect the `render.yaml` file in the `humanauth-render` directory
+   - The `render.yaml` file includes a `rootDir: humanauth-render` setting to ensure Render uses the correct directory
    - Review the service that will be created:
      - `humanauth`: A combined web service that includes both the Flask API backend and Angular frontend
    - You can modify environment variables if needed

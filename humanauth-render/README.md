@@ -18,6 +18,7 @@ This directory contains a version of HumanAuth optimized for deployment on Rende
 3. Click "New Blueprint Instance" in Render dashboard
 4. Select your repository
 5. Render will automatically detect the `render.yaml` file and configure the service
+   - Note: The `render.yaml` file includes a `rootDir: humanauth-render` setting to ensure Render uses the correct directory
 6. Click "Apply" to deploy the service
 
 ### Option 2: Manual Deployment

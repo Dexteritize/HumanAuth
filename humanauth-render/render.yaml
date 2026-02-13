@@ -4,6 +4,7 @@ services:
     name: humanauth
     env: python
     plan: free
+    rootDir: humanauth-render
     buildCommand: |
       # Build frontend
       cd frontend && npm install && npm run build && cd ..
