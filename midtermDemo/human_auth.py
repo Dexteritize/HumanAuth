@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Simplified HumanAuth Engine for Midterm Demo
+HumanAuth Engine for Midterm Demo
 
 This implements the three core challenges:
 1. Blink Once

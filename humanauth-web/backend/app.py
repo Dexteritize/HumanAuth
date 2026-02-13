@@ -27,7 +27,7 @@ from functools import wraps
 
 import cv2
 import numpy as np
-from flask import Flask, request, jsonify, g
+from flask import Blueprint, request, jsonify, g, Flask
 from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -61,37 +61,18 @@ except Exception as e:
 # ------------------------------------------------------------------------------
 # App setup
 # ------------------------------------------------------------------------------
-app = Flask(__name__)
-app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "humanauth-web-demo-secret-key")
+# Create a blueprint instead of a Flask app
+app = Blueprint('api', __name__)
 
-# CORS setup - configurable to allow external sites
+# Store configuration values that will be used by the main app
+SECRET_KEY = os.environ.get("SECRET_KEY", "humanauth-web-demo-secret-key")
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:4200")
-# Get allowed origins from environment variable, defaulting to frontend URL
-# Format: comma-separated list of allowed origins, e.g. "http://example.com,https://app.example.com"
 ALLOWED_ORIGINS = os.environ.get("ALLOWED_ORIGINS", FRONTEND_URL)
-allowed_origins = [origin.strip() for origin in ALLOWED_ORIGINS.split(",")]
-
-# In production, only allow specific origins
-if os.environ.get("FLASK_ENV") == "production":
-    logger.info(f"CORS: Allowing specific origins: {allowed_origins}")
-    CORS(app, resources={
-        r"/api/*": {"origins": allowed_origins, "supports_credentials": False}
-    })
-else:
-    # In development, allow all origins for easier testing
-    logger.info("CORS: Development mode - allowing all origins")
-    CORS(app)
-
-# API key authentication
 API_KEY = os.environ.get("API_KEY", "dev-api-key-change-me-in-production")
 
-# Rate limiting setup
-limiter = Limiter(
-    get_remote_address,
-    app=app,
-    default_limits=["200 per day", "50 per hour"],
-    storage_uri="memory://",
-)
+# CORS and rate limiting will be set up in the main app
+# These are placeholders for documentation purposes
+limiter = None
 
 # ------------------------------------------------------------------------------
 # Authentication & Authorization
@@ -502,5 +483,33 @@ def process_frame():
 # Main
 # ------------------------------------------------------------------------------
 if __name__ == "__main__":
+    # When running this file directly, create a Flask app and register the blueprint
+    # This is for development/testing only
+    flask_app = Flask(__name__)
+    flask_app.config["SECRET_KEY"] = SECRET_KEY
+    
+    # Set up CORS
+    if os.environ.get("FLASK_ENV") == "production":
+        allowed_origins = [origin.strip() for origin in ALLOWED_ORIGINS.split(",")]
+        logger.info(f"CORS: Allowing specific origins: {allowed_origins}")
+        CORS(flask_app, resources={
+            r"/api/*": {"origins": allowed_origins, "supports_credentials": False}
+        })
+    else:
+        logger.info("CORS: Development mode - allowing all origins")
+        CORS(flask_app)
+    
+    # Set up rate limiting
+    limiter = Limiter(
+        get_remote_address,
+        app=flask_app,
+        default_limits=["200 per day", "50 per hour"],
+        storage_uri="memory://",
+    )
+    
+    # Register the blueprint
+    flask_app.register_blueprint(app, url_prefix='/api')
+    
+    # Run the app
     port = int(os.environ.get("PORT", 8000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+    flask_app.run(host="0.0.0.0", port=port, debug=True)

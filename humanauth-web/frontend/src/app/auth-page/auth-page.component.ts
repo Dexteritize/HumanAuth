@@ -51,7 +51,7 @@ export class AuthPageComponent implements OnDestroy {
   @ViewChild("video", { static: true }) video!: ElementRef<HTMLVideoElement>;
   @ViewChild("canvas", { static: true }) canvas!: ElementRef<HTMLCanvasElement>;
 
-  backendUrl = "http://localhost:8000";
+  backendUrl = "/api";
   running = false;
   result?: AuthResult;
   error?: string;
@@ -81,7 +81,7 @@ export class AuthPageComponent implements OnDestroy {
   async start() {
     // Set running flag immediately so UI updates right away.
     this.running = true;
-    
+
     // Reset any previous UI state
     this.error = undefined;
     this.result = undefined; // Clear previous authentication result
@@ -135,18 +135,18 @@ export class AuthPageComponent implements OnDestroy {
 
     // Stop camera and clear video feed
     this.cam.stop();
-    
+
     // Clear the video source to immediately stop the feed
     const videoEl = this.video.nativeElement;
     videoEl.srcObject = null;
-    
+
     // Clear the canvas overlay
     const canvasEl = this.canvas.nativeElement;
     const ctx = canvasEl.getContext('2d');
     if (ctx) {
       ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
     }
-    
+
     this.auth.disconnect();
   }
 
