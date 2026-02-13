@@ -1,0 +1,502 @@
+:host {
+  display: block;
+}
+
+/* ===== HumanAuth Panel (component-scoped) ===== */
+.ha-panel {
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(230, 126, 95, 0.08), rgba(230, 126, 95, 0.05));
+  border: 1px solid rgba(230, 126, 95, 0.25);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.25);
+  padding: clamp(14px, 2vw, 20px);
+  color: rgba(255, 255, 255, 0.92);
+  overflow: hidden;
+}
+
+/* Header */
+.ha-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.ha-title {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+
+.ha-title-text {
+  min-width: 0;
+}
+
+.ha-mark {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background-image: url('/HedgeOrange.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.35);
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.ha-h1 {
+  margin: 0;
+  font-size: clamp(1.25rem, 1.5vw, 1.6rem);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ha-sub {
+  margin: 6px 0 0;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.95rem;
+  line-height: 1.45;
+  max-width: 70ch;
+}
+
+/* Badges */
+.ha-badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.ha-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16); /* increased opacity */
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 0.9rem;
+  white-space: nowrap;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.ha-badge.ok {
+  border-color: rgba(108, 255, 214, 0.25);
+  background: rgba(108, 255, 214, 0.1);
+}
+
+.ha-badge.warn {
+  border-color: rgba(255, 214, 102, 0.28);
+  background: rgba(255, 214, 102, 0.1);
+}
+
+.ha-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: rgba(230, 126, 95, 0.9);
+  box-shadow: 0 0 0 4px rgba(230, 126, 95, 0.15);
+}
+
+.ha-dot.idle {
+  background: rgba(180, 190, 210, 0.9);
+  box-shadow: 0 0 0 4px rgba(180, 190, 210, 0.12);
+}
+
+/* Stage */
+.ha-stage {
+  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.ha-stage-inner {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  min-height: 400px;
+}
+
+.ha-video,
+.ha-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.ha-video {
+  object-fit: cover;
+  /* Mirror the camera preview like a mirror */
+  transform: translate3d(0, 0, 0) scaleX(-1);
+  will-change: transform;
+}
+
+/* Blend canvas gently on top */
+.ha-canvas {
+  pointer-events: none;
+  opacity: 0.98;
+  mix-blend-mode: screen;
+  border-radius: 0;
+  /* Keep canvas rendered normally; drawing code flips landmarks via the canvas context */
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+}
+
+/* Overlay corners + hints */
+.ha-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px;
+}
+
+.ha-corner {
+  position: absolute;
+  width: 32px; /* Increased size */
+  height: 32px; /* Increased size */
+  border: 2px solid rgba(255, 255, 255, 0.65); /* More visible */
+  opacity: 0.65; /* More visible */
+}
+
+.ha-corner.tl {
+  top: 20px; /* More spacing */
+  left: 20px; /* More spacing */
+  border-right: 0;
+  border-bottom: 0;
+  border-radius: 12px 0 0 0; /* Larger radius */
+}
+
+.ha-corner.tr {
+  top: 20px; /* More spacing */
+  right: 20px; /* More spacing */
+  border-left: 0;
+  border-bottom: 0;
+  border-radius: 0 12px 0 0; /* Larger radius */
+}
+
+.ha-corner.bl {
+  bottom: 20px; /* More spacing */
+  left: 20px; /* More spacing */
+  border-right: 0;
+  border-top: 0;
+  border-radius: 0 0 0 12px; /* Larger radius */
+}
+
+.ha-corner.br {
+  bottom: 20px; /* More spacing */
+  right: 20px; /* More spacing */
+  border-left: 0;
+  border-top: 0;
+  border-radius: 0 0 12px 0; /* Larger radius */
+}
+
+.ha-hint {
+  position: absolute;
+  left: 20px; /* More spacing */
+  bottom: 20px; /* More spacing */
+  padding: 14px 16px; /* More padding */
+  border-radius: 16px; /* Larger radius */
+
+  /* MORE OPAQUE */
+  background: rgba(0, 0, 0, 0.85); /* Increased opacity */
+  border: 1px solid rgba(255, 255, 255, 0.25); /* More visible border */
+
+  color: rgba(255, 255, 255, 0.95); /* Brighter text */
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  max-width: 70%;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4); /* Stronger shadow */
+}
+
+.ha-hint-title {
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  margin-bottom: 4px; /* More spacing */
+  font-size: 1.05rem; /* Larger font */
+}
+
+.ha-hint-body {
+  color: rgba(255, 255, 255, 0.85); /* Brighter text */
+  font-size: 0.95rem;
+  line-height: 1.4; /* Better line height */
+}
+
+/* New in-video challenge card */
+.ha-in-video-challenge {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 16px 20px; /* Generous padding */
+  border-radius: 16px;
+  text-align: center;
+
+  /* Highly visible styling */
+  background: rgba(0, 0, 0, 0.85); /* Very opaque background */
+  border: 2px solid rgba(255, 255, 255, 0.3); /* Visible border */
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5); /* Strong shadow */
+
+  /* Make sure it's on top */
+  z-index: 10;
+
+  /* Add a subtle glow effect */
+  box-shadow: 0 0 20px rgba(230, 126, 95, 0.2), 0 8px 30px rgba(0, 0, 0, 0.5);
+
+  /* Ensure text is very readable */
+  color: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  /* Size constraints */
+  min-width: 280px;
+  max-width: 80%;
+}
+
+.ha-live {
+  position: absolute;
+  top: 20px; /* More spacing */
+  left: 20px; /* More spacing */
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px; /* More padding */
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.75); /* More opaque */
+  border: 1px solid rgba(255, 255, 255, 0.25); /* More visible border */
+  color: rgba(255, 255, 255, 0.9); /* Brighter text */
+  font-size: 0.95rem; /* Slightly larger */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.ha-pulse {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255, 96, 96, 0.95);
+  box-shadow: 0 0 0 0 rgba(255, 96, 96, 0);
+  animation: haPulse 1.25s ease-out infinite;
+}
+
+@keyframes haPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 96, 96, 0.28);
+  }
+  100% {
+    box-shadow: 0 0 0 12px rgba(255, 96, 96, 0);
+  }
+}
+
+/* Controls */
+.ha-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.ha-spacer {
+  flex: 1 1 auto;
+  min-width: 8px;
+}
+
+.ha-btn {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 14px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.25);
+  transition: transform 120ms ease, background 120ms ease, border-color 120ms ease,
+    opacity 120ms ease;
+}
+
+.ha-btn:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.ha-btn:active {
+  transform: translateY(0);
+}
+
+.ha-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.ha-btn.primary {
+  background: linear-gradient(135deg, #e67e5f, #f4a460);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.ha-btn.ghost {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.ha-btn-ic {
+  width: 22px;
+  height: 22px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+/* Mini message strips */
+.ha-mini {
+  max-width: 520px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.ha-mini.error {
+  background: rgba(255, 96, 96, 0.12);
+  border-color: rgba(255, 96, 96, 0.22);
+}
+
+.ha-mini-msg {
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+
+/* Detail card */
+.ha-detail {
+  margin-top: 14px;
+  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.42); /* more opaque */
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 14px;
+}
+
+.ha-detail-row {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.ha-kv {
+  flex: 1 1 220px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 12px;
+}
+
+.ha-k {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.85rem;
+  margin-bottom: 6px;
+}
+
+.ha-v {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.ha-v.ok {
+  color: rgba(108, 255, 214, 0.95);
+}
+
+.ha-v.warn {
+  color: rgba(255, 214, 102, 0.95);
+}
+
+/* Challenge card styling - used for both in-video and standalone cards */
+.ha-challenge-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: rgb(160, 160, 255); /* Brighter blue */
+  letter-spacing: 0.04em;
+  margin-bottom: 8px; /* More spacing */
+  text-transform: uppercase;
+}
+
+.ha-challenge-body {
+  font-size: 1.3rem; /* Larger font */
+  font-weight: 800;
+  color: rgba(255,255,255,0.98);
+  margin-bottom: 10px; /* More spacing */
+  line-height: 1.3; /* Better line height */
+}
+
+.ha-challenge-progress {
+  font-size: 1rem; /* Larger font */
+  color: rgba(220,220,240,0.9); /* Brighter text */
+  margin-top: 6px; /* More spacing */
+}
+
+/* Additional styling specific to the in-video challenge card */
+.ha-in-video-challenge .ha-challenge-title {
+  color: rgb(180, 180, 255); /* Even brighter blue for better contrast */
+}
+
+.ha-in-video-challenge .ha-challenge-body {
+  font-size: 1.4rem; /* Even larger font for in-video */
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5); /* Text shadow for better readability */
+}
+
+.ha-in-video-challenge .ha-challenge-progress {
+  background: rgba(255,255,255,0.1); /* Subtle background */
+  padding: 6px 10px; /* Add padding */
+  border-radius: 8px; /* Rounded corners */
+  display: inline-block; /* Allow background to wrap content */
+}
+
+/* Responsive header layout */
+@media (max-width: 720px) {
+  .ha-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .ha-badges {
+    justify-content: flex-start;
+  }
+  .ha-hint {
+    max-width: calc(100% - 32px);
+  }
+}
+
+/* Accessibility: reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .ha-pulse {
+    animation: none;
+  }
+  .ha-btn {
+    transition: none;
+  }
+  .ha-meter-fill {
+    transition: none;
+  }
+}

@@ -1,0 +1,250 @@
+.authentication-container {
+  color: var(--text);
+  padding: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+
+  h2 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    color: rgba(255, 255, 255, 0.95);
+    text-align: center;
+  }
+
+  h3 {
+    font-size: 1.5rem;
+    margin: 2rem 0 1rem;
+    color: rgba(255, 255, 255, 0.9);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding-bottom: 0.5rem;
+  }
+
+  h4 {
+    font-size: 1.2rem;
+    margin: 1rem 0 0.5rem;
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  p {
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    color: var(--muted);
+  }
+
+  ul {
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+
+    li {
+      margin-bottom: 0.5rem;
+      color: var(--muted);
+    }
+  }
+
+  a {
+    color: #6cb4ff;
+    text-decoration: none;
+    transition: color 0.2s;
+
+    &:hover {
+      color: #8cc7ff;
+      text-decoration: underline;
+    }
+  }
+}
+
+.authentication-intro {
+  margin-bottom: 2rem;
+  text-align: center;
+
+  .intro-highlight {
+    font-size: 1.3rem;
+    line-height: 1.5;
+    color: var(--text);
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .highlight-face {
+    color: #ff9d7a;
+    font-weight: bold;
+  }
+
+  .highlight-hand {
+    color: #7acdff;
+    font-weight: bold;
+  }
+
+  .highlight-humans {
+    color: #7aff9d;
+    font-weight: bold;
+  }
+
+  .highlight-bots {
+    color: #ff7a7a;
+    font-weight: bold;
+  }
+}
+
+.authentication-section {
+  margin-bottom: 3rem;
+}
+
+.auth-methods {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+/* Center the last card when it's alone in a row */
+.auth-methods .auth-method:last-child:nth-child(3n-2) {
+  grid-column: 2;
+}
+
+/* Responsive adjustments for the auth-methods grid */
+@media (max-width: 992px) {
+  .auth-methods {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Center the last card when it's alone in a row */
+  .auth-methods .auth-method:last-child:nth-child(2n-1) {
+    grid-column: 1 / span 2;
+    max-width: 50%;
+    margin: 0 auto;
+  }
+}
+
+.auth-method {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  }
+
+  .method-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    display: inline-block;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    width: 3rem;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+
+.challenges {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+
+  .challenge {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .challenge-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    h4 {
+      margin-top: 0;
+    }
+
+    p {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.security-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+
+  .security-feature {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .feature-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    h4 {
+      margin-top: 0;
+    }
+
+    p {
+      margin-bottom: 0;
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .authentication-container {
+    padding: 15px;
+
+    h2 {
+      font-size: 1.8rem;
+    }
+
+    h3 {
+      font-size: 1.3rem;
+    }
+
+    h4 {
+      font-size: 1.1rem;
+    }
+  }
+
+  .authentication-intro {
+    .intro-highlight {
+      font-size: 1.1rem;
+      padding: 1rem;
+    }
+  }
+
+  .auth-methods,
+  .challenges,
+  .security-features {
+    grid-template-columns: 1fr;
+  }
+
+}

@@ -1,0 +1,188 @@
+<div class="architecture-container">
+  <h2>HumanAuth System Architecture</h2>
+
+  <div class="architecture-intro">
+    <p class="intro-highlight">
+      <span class="highlight-face">Face</span> and <span class="highlight-hand">hand</span> recognition to verify <span class="highlight-humans">humans</span> vs. <span class="highlight-bots">bots</span>.
+    </p>
+    <p>
+      HumanAuth is a biometric authentication system that uses computer vision to distinguish real humans from automated bots or spoofing attempts. Unlike traditional CAPTCHAs, it analyzes natural human movements and responses to interactive challenges.
+    </p>
+  </div>
+
+  <div class="architecture-overview">
+    <h3>System Overview</h3>
+
+    <div class="flow-description">
+      <p>
+        HumanAuth works through a three-step process: the frontend captures video frames from the user's camera, the backend processes these frames using MediaPipe's machine learning models, and then verifies the user's identity through interactive challenges that require natural human responses.
+      </p>
+    </div>
+
+    <div class="simple-flow-diagram">
+      <!-- Client -->
+      <div class="flow-box client">
+        <div class="flow-header">
+          <div class="flow-icon">🖥️</div>
+          <h4>Client Application</h4>
+        </div>
+        <div class="flow-body">
+          <div class="flow-section">
+            <div class="section-icon">🎨</div>
+            <h5>Angular Frontend</h5>
+            <ul>
+              <li>Auth Page, Camera & Auth Services</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Communication Arrow -->
+      <div class="flow-connector">
+        <div style="font-size: 2rem; text-align: center;">→</div>
+      </div>
+
+      <!-- Server -->
+      <div class="flow-box server">
+        <div class="flow-header">
+          <div class="flow-icon">⚡</div>
+          <h4>Server Components</h4>
+        </div>
+        <div class="flow-body">
+          <div class="flow-section">
+            <div class="section-icon">🔧</div>
+            <h5>Flask API & HumanAuth Engine</h5>
+            <ul>
+              <li>MediaPipe Integration</li>
+              <li>Face & Hand Detection</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="architecture-section">
+    <h3>⚙️ Backend Architecture</h3>
+    <div class="component-details">
+      <div class="component-card">
+        <div class="component-icon">🔧</div>
+        <h4>Flask Server (app.py)</h4>
+        <p>
+          The Flask server provides REST API endpoints that handle all communication with the frontend. It manages user sessions, processes incoming video frames, and coordinates the authentication workflow. The server validates requests, ensures proper session management, and implements security measures like rate limiting and API key validation.
+        </p>
+      </div>
+
+      <div class="component-card engine-card">
+        <div class="component-icon">🤖</div>
+        <h4>Human Authentication Engine</h4>
+        <p>
+          The core of HumanAuth is its authentication engine that uses MediaPipe's machine learning models to detect and analyze facial landmarks (468 points) and hand gestures (21 points per hand). The engine implements sophisticated anti-spoofing techniques that detect micro-movements, analyze blink patterns, and verify 3D spatial consistency to prevent attacks using photos, videos, or deepfakes.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="architecture-section">
+    <h3>🎨 Frontend Architecture</h3>
+    <div class="component-details">
+      <div class="component-card">
+        <div class="component-icon angular-logo">
+          <svg width="64" height="64" viewBox="0 0 250 250" xmlns="http://www.w3.org/2000/svg">
+            <path fill="#DD0031" d="M125 30L31.9 63.2l14.2 123.1L125 230l78.9-43.7 14.2-123.1z"/>
+            <path fill="#C3002F" d="M125 30v22.2-.1V230l78.9-43.7 14.2-123.1L125 30z"/>
+            <path fill="#FFFFFF" d="M125 52.1L66.8 182.6h21.7l11.7-29.2h49.4l11.7 29.2H183L125 52.1zm17 83.3h-34l17-40.9 17 40.9z"/>
+          </svg>
+        </div>
+        <h4>Angular Application</h4>
+        <p>
+          The frontend is built with Angular and consists of three main components:
+        </p>
+        <ul>
+          <li><strong>Auth Page Component:</strong> Provides the user interface for the authentication process, displaying camera feed, challenge instructions, and authentication status.</li>
+          <li><strong>Camera Service:</strong> Handles camera initialization, video stream capture, and frame extraction. It manages permissions, camera selection, and optimizes frame rate for processing.</li>
+          <li><strong>Auth Service:</strong> Manages communication with the backend API, handles session creation, frame submission, and processes authentication responses and challenges.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="architecture-section">
+    <h3>🌐 API Communication</h3>
+    <div class="component-details">
+      <h4>Key REST API Endpoints</h4>
+      <p>
+        The HumanAuth system uses a RESTful API architecture for communication between the frontend and backend. All data is exchanged in JSON format, and authentication is secured using API keys.
+      </p>
+      <div class="api-endpoints">
+        <div class="endpoint">
+          <div class="endpoint-method get">GET</div>
+          <h5>/api/config</h5>
+          <p>Retrieves API configuration including supported features, challenge types, and processing parameters. This is the first endpoint called during initialization.</p>
+        </div>
+        <div class="endpoint">
+          <div class="endpoint-method post">POST</div>
+          <h5>/api/sessions</h5>
+          <p>Creates a new authentication session with a unique session ID. The session maintains state throughout the authentication process and tracks challenge progress.</p>
+        </div>
+        <div class="endpoint">
+          <div class="endpoint-method post">POST</div>
+          <h5>/api/sessions/&#123;session_id&#125;/process</h5>
+          <p>Processes a video frame, performs face and hand detection, evaluates ongoing challenges, and returns the next steps in the authentication flow. This endpoint is called repeatedly during the authentication process.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="architecture-section">
+    <h3>Security Considerations</h3>
+
+    <p>
+      HumanAuth implements multiple layers of security to prevent various types of spoofing attacks while maintaining user privacy. The system is designed to detect sophisticated attempts to bypass authentication, including the use of photos, videos, deepfakes, and 3D masks.
+    </p>
+
+    <div class="security-diagram">
+      <h4>Anti-Spoofing Defense Layers</h4>
+      <div class="security-layers">
+        <div class="security-layer physical">
+          <div class="security-layer-content">
+            <h5>Physical Presence Detection</h5>
+            <ul>
+              <li><strong>Micro-movement analysis:</strong> Detects subtle natural movements that occur even when a person is trying to remain still</li>
+              <li><strong>Blink pattern detection:</strong> Analyzes natural eye blink patterns that are difficult to simulate</li>
+              <li><strong>3D consistency checks:</strong> Verifies that facial features maintain proper spatial relationships as the head moves</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="security-layer interactive">
+          <div class="security-layer-content">
+            <h5>Interactive Challenge System</h5>
+            <ul>
+              <li><strong>Randomized challenges:</strong> Unpredictable sequence of actions that cannot be pre-recorded</li>
+              <li><strong>Multi-modal verification:</strong> Combines face and hand detection for stronger security</li>
+              <li><strong>Temporal analysis:</strong> Verifies that responses occur within expected timeframes</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="privacy-security-split">
+      <div class="privacy-section">
+        <h4>Privacy Protections</h4>
+        <div class="privacy-features">
+          <div class="privacy-feature">
+            <div class="privacy-content">
+              <h5>Privacy-First Design</h5>
+              <p><strong>No biometric storage:</strong> All biometric data is processed in memory and immediately discarded</p>
+              <p><strong>Session isolation:</strong> Each authentication session is isolated and data is not shared between sessions</p>
+              <p><strong>Minimal data collection:</strong> Only collects the data necessary for authentication, not for identification</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

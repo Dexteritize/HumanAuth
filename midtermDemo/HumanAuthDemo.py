@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 """
-HumanAuth Midterm Demo - Simple Authentication Demo
+HumanAuth Midterm Demo
 
-This is a simplified version of the HumanAuth demo that only implements
+This is a version of HumanAuth that implements
 the three core challenges:
 1. Blink Once
 2. Show Peace Sign
 3. Show Five Fingers
-
-The UI is designed to resemble the web version while being self-contained.
 
 Author: Jason Dank (2026)
 """

@@ -1,0 +1,70 @@
+<!-- Enhanced capture/auth panel (no external deps) -->
+
+<section class="ha-panel">
+
+  <!-- Header / status strip -->
+  <div class="ha-header">
+    <div class="ha-title">
+      <div class="ha-mark" aria-hidden="true"></div>
+      <div class="ha-title-text">
+        <h1 class="ha-h1">HumanAuth Web</h1>
+        <p class="ha-sub">Align your face in the frame. Keep lighting steady for best results.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Challenge card removed from outside the video frame as per requirements -->
+
+  <!-- Camera stage -->
+  <div class="ha-stage" [class.running]="running">
+    <div class="ha-stage-inner">
+      <video #video muted playsinline class="ha-video"></video>
+      <canvas #canvas class="ha-canvas"></canvas>
+
+      <!-- Overlay hints -->
+      <div class="ha-overlay">
+        <div class="ha-corner tl"></div>
+        <div class="ha-corner tr"></div>
+        <div class="ha-corner bl"></div>
+        <div class="ha-corner br"></div>
+
+        <div class="ha-hint" *ngIf="!running">
+          <div class="ha-hint-title">Camera preview</div>
+          <div class="ha-hint-body">Press <b>Start</b> to begin authentication.</div>
+        </div>
+
+
+        <div class="ha-live" *ngIf="running">
+          <span class="ha-pulse" aria-hidden="true"></span>
+          Live
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="ha-controls">
+    <button class="ha-btn primary" (click)="start()" [disabled]="running">
+      <span class="ha-btn-ic" aria-hidden="true">▶</span>
+      Start
+    </button>
+
+    <button class="ha-btn ghost" (click)="stop()" [disabled]="!running">
+      <span class="ha-btn-ic" aria-hidden="true">■</span>
+      Stop
+    </button>
+
+    <button class="ha-btn secondary" (click)="reload()" [disabled]="!running">
+      <span class="ha-btn-ic" aria-hidden="true">↻</span>
+      Reload
+    </button>
+
+    <div class="ha-spacer"></div>
+
+    <div class="ha-mini error" *ngIf="error">
+      <div class="ha-mini-msg">{{ error }}</div>
+    </div>
+  </div>
+
+
+</section>
