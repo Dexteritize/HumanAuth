@@ -27,7 +27,7 @@ from functools import wraps
 
 import cv2
 import numpy as np
-from flask import Flask, request, jsonify, g
+from flask import Flask, request, jsonify, g, send_from_directory
 from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -47,6 +47,8 @@ logger = logging.getLogger("humanauth-backend")
 # ------------------------------------------------------------------------------
 # Assume this file is in backend/ and human_auth.py + .task files are also in backend/
 BACKEND_DIR = Path(__file__).resolve().parent
+# Define the path to the frontend build output directory
+FRONTEND_DIR = (BACKEND_DIR.parent / "frontend" / "dist" / "frontend").resolve()
 import sys
 
 if str(BACKEND_DIR) not in sys.path:
@@ -510,9 +512,33 @@ def process_frame():
 
 
 # ------------------------------------------------------------------------------
+# Frontend Routes
+# ------------------------------------------------------------------------------
+@app.route('/<path:path>')
+def serve_static(path):
+    """Serve static files from the frontend build directory"""
+    if path.startswith('api/'):
+        return jsonify({"status": "error", "message": "Not found"}), 404
+    try:
+        return send_from_directory(FRONTEND_DIR, path)
+    except:
+        # If the file doesn't exist, serve index.html for Angular routing
+        return send_from_directory(FRONTEND_DIR, 'index.html')
+
+@app.route('/')
+def serve_index():
+    """Serve the index.html file for the frontend"""
+    return send_from_directory(FRONTEND_DIR, 'index.html')
+
+# ------------------------------------------------------------------------------
 # Main
 # ------------------------------------------------------------------------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
     debug_mode = os.environ.get("FLASK_ENV") != "production"
+    
+    # Log the frontend directory path
+    logger.info(f"FRONTEND_DIR = {FRONTEND_DIR}")
+    logger.info(f"FRONTEND_DIR exists = {FRONTEND_DIR.exists()}")
+    
     app.run(host="0.0.0.0", port=port, debug=debug_mode)

@@ -1,10 +1,14 @@
 services:
-  # Backend service
+  # Combined service (backend + frontend)
   - type: web
-    name: humanauth-backend
+    name: humanauth
     env: python
     plan: free
-    buildCommand: pip install -r backend/requirements.txt
+    buildCommand: |
+      # Build frontend
+      cd frontend && npm install && npm run build && cd ..
+      # Build backend
+      pip install -r backend/requirements.txt
     startCommand: cd backend && python app.py
     envVars:
       - key: PORT
@@ -15,17 +19,5 @@ services:
         generateValue: true
       - key: PYTHON_VERSION
         value: 3.9.0
-    
-  # Frontend service
-  - type: web
-    name: humanauth-frontend
-    env: static
-    buildCommand: cd frontend && npm install && npm run build
-    staticPublishPath: ./frontend/dist/frontend
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
-    envVars:
       - key: NODE_VERSION
         value: 20.x
