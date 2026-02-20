@@ -24,6 +24,33 @@ if [[ ! -f "$BACKEND_DIR/face_landmarker.task" || ! -f "$BACKEND_DIR/hand_landma
   exit 1
 fi
 
+# ---------- Parse arguments (prod/dev) ----------
+# Default environment is 'prod'. Use --dev to run frontend against local backend at http://localhost:8000
+ENVIRONMENT="prod"
+while [[ "$#" -gt 0 ]]; do
+  case "$1" in
+    --dev)
+      ENVIRONMENT="dev"
+      shift
+      ;;
+    --prod)
+      ENVIRONMENT="prod"
+      shift
+      ;;
+    --help|-h)
+      echo "Usage: $0 [--dev|--prod]"
+      echo "  --dev   : run frontend in development mode (production=false) and point backend to http://localhost:8000"
+      echo "  --prod  : run frontend in production mode (production=true) and use existing environment file (default)"
+      exit 0
+      ;;
+    *)
+      echo "Unknown argument: $1"
+      echo "Usage: $0 [--dev|--prod]"
+      exit 1
+      ;;
+  esac
+done
+
 # ---------- Helpers ----------
 kill_tree() {
   # Kills a process and all of its children (macOS/Linux)
@@ -107,6 +134,31 @@ echo "Backend server started with PID: $BACKEND_PID"
 echo "Waiting for backend to initialize..."
 sleep 3
 
+# ---------- Prepare Frontend environment file ----------
+FRONTEND_ENV_FILE="$FRONTEND_DIR/src/environments/environment.ts"
+if [[ "$ENVIRONMENT" == "dev" ]]; then
+  echo "Configuring frontend for DEVELOPMENT mode (production=false, backendUrl=http://localhost:8000)"
+  cat > "$FRONTEND_ENV_FILE" <<EOF
+export const environment = {
+  production: false,
+  backendUrl: 'http://localhost:8000'
+};
+EOF
+  FRONTEND_BACKEND_URL="http://localhost:8000"
+else
+  echo "Configuring frontend for PRODUCTION mode (using existing environment file)"
+  # Attempt to read backendUrl from existing file; fall back to empty string
+  FRONTEND_BACKEND_URL=""
+  if [[ -f "$FRONTEND_ENV_FILE" ]]; then
+    # extract backendUrl value if present (simple grep + sed)
+    VAL=$(grep -o "backendUrl: *['\"]\?[^,'\"]*['\"]?" "$FRONTEND_ENV_FILE" 2>/dev/null || true)
+    if [[ -n "$VAL" ]]; then
+      # strip prefix
+      FRONTEND_BACKEND_URL=$(echo "$VAL" | sed -E "s/backendUrl: *['\"]?([^,'\"]*)['\"]?/\1/")
+    fi
+  fi
+fi
+
 # ---------- Start Frontend ----------
 echo "Starting frontend server..."
 cd "$FRONTEND_DIR" || exit 1
@@ -120,7 +172,13 @@ STARTED=1
 echo ""
 echo "------------------------------"
 echo "HumanAuth Web Demo is running!"
+echo "Environment: $ENVIRONMENT"
 echo "Backend : http://localhost:8000"
+if [[ -n "$FRONTEND_BACKEND_URL" ]]; then
+  echo "Frontend backendUrl: $FRONTEND_BACKEND_URL"
+else
+  echo "Frontend backendUrl: (empty)"
+fi
 echo "Frontend: http://localhost:4200"
 echo ""
 echo "Open your browser and navigate to: http://localhost:4200"
