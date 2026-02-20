@@ -1,6 +1,0 @@
-flask
-flask-cors
-flask-limiter
-opencv-python
-numpy
-mediapipe
