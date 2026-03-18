@@ -23,10 +23,6 @@
 
       <!-- Overlay hints -->
       <div class="ha-overlay">
-        <div class="ha-corner tl"></div>
-        <div class="ha-corner tr"></div>
-        <div class="ha-corner bl"></div>
-        <div class="ha-corner br"></div>
 
         <div class="ha-hint" *ngIf="!running">
           <div class="ha-hint-title">Camera preview</div>
@@ -34,16 +30,153 @@
         </div>
 
 
-        <div class="ha-live" *ngIf="running">
-          <span class="ha-pulse" aria-hidden="true"></span>
-          Live
-        </div>
       </div>
     </div>
   </div>
 
+  <!-- Enhanced Session Summary Panel (shown after successful authentication) -->
+  <div class="ha-summary-panel" *ngIf="sessionSummary && result?.authenticated">
+    <div class="ha-summary-header">
+      <h2 class="ha-summary-title">🎉 Authentication Complete!</h2>
+      <div class="ha-summary-status success">
+        <span class="ha-status-icon">✓</span>
+        Successfully Verified as Human
+      </div>
+    </div>
+
+    <!-- Quick Stats Overview -->
+    <div class="ha-quick-stats">
+      <div class="ha-stat-card">
+        <div class="ha-stat-value">{{ (sessionSummary.final_confidence * 100) | number:'1.0-0' }}%</div>
+        <div class="ha-stat-label">Confidence Score</div>
+      </div>
+      <div class="ha-stat-card">
+        <div class="ha-stat-value">{{ sessionSummary.session_duration | number:'1.1-1' }}s</div>
+        <div class="ha-stat-label">Session Duration</div>
+      </div>
+      <div class="ha-stat-card">
+        <div class="ha-stat-value">{{ sessionSummary.challenges_completed }}/{{ sessionSummary.challenges_required }}</div>
+        <div class="ha-stat-label">Challenges Completed</div>
+      </div>
+      <div class="ha-stat-card">
+        <div class="ha-stat-value">{{ sessionSummary.frames_processed }}</div>
+        <div class="ha-stat-label">Frames Analyzed</div>
+      </div>
+    </div>
+
+    <div class="ha-summary-content">
+      <!-- Authentication Overview -->
+      <div class="ha-summary-section">
+        <h3 class="ha-section-title">Authentication Details</h3>
+        <div class="ha-summary-grid">
+          <div class="ha-summary-item">
+            <span class="ha-label">Method:</span>
+            <span class="ha-value">{{ sessionSummary.auth_method | titlecase }}</span>
+          </div>
+          <div class="ha-summary-item">
+            <span class="ha-label">Final Confidence:</span>
+            <span class="ha-value confidence-high">{{ (sessionSummary.final_confidence * 100) | number:'1.1-1' }}%</span>
+          </div>
+          <div class="ha-summary-item">
+            <span class="ha-label">Threshold:</span>
+            <span class="ha-value">{{ (sessionSummary.auth_threshold * 100) | number:'1.1-1' }}%</span>
+          </div>
+          <div class="ha-summary-item">
+            <span class="ha-label">Challenges:</span>
+            <span class="ha-value">{{ sessionSummary.challenges_completed }}/{{ sessionSummary.challenges_required }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Confidence Breakdown -->
+      <div class="ha-summary-section">
+        <h3 class="ha-section-title">Confidence Breakdown</h3>
+        <div class="ha-summary-grid">
+          <div class="ha-summary-item">
+            <span class="ha-label">Passive Base:</span>
+            <span class="ha-value">{{ (sessionSummary.passive_base * 100) | number:'1.1-1' }}%</span>
+          </div>
+          <div class="ha-summary-item">
+            <span class="ha-label">Challenge Boost:</span>
+            <span class="ha-value">{{ (sessionSummary.challenge_boost * 100) | number:'1.1-1' }}%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Enhanced Detector Analysis -->
+      <div class="ha-summary-section">
+        <h3 class="ha-section-title">🔍 Biometric Analysis Results</h3>
+        <div class="ha-detector-explanation">
+          <p>Our advanced AI analyzed multiple biometric indicators to verify your humanity:</p>
+        </div>
+        <div class="ha-detector-list">
+          <div class="ha-detector-item" *ngFor="let detector of getDetectorEntries()">
+            <div class="ha-detector-header">
+              <div class="ha-detector-info">
+                <span class="ha-detector-name">{{ detector.name | titlecase }}</span>
+                <span class="ha-detector-description">{{ getDetectorDescription(detector.name) }}</span>
+              </div>
+              <div class="ha-detector-metrics">
+                <span class="ha-detector-score" [class]="getScoreClass(detector.contribution)">
+                  {{ (detector.contribution * 100) | number:'1.1-1' }}%
+                </span>
+                <div class="ha-detector-bar">
+                  <div class="ha-detector-fill" [style.width.%]="detector.contribution * 100" [class]="getScoreClass(detector.contribution)"></div>
+                </div>
+              </div>
+            </div>
+            <div class="ha-detector-details">
+              <span class="ha-detector-detail">Raw Score: {{ (detector.score * 100) | number:'1.1-1' }}%</span>
+              <span class="ha-detector-detail">Algorithm Weight: {{ (detector.weight * 100) | number:'1.0-0' }}%</span>
+              <span class="ha-detector-detail">Contribution: {{ (detector.contribution * 100) | number:'1.1-1' }}%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Challenge History -->
+      <div class="ha-summary-section" *ngIf="sessionSummary.completed_challenges.length > 0">
+        <h3 class="ha-section-title">Challenge History</h3>
+        <div class="ha-challenge-list">
+          <div class="ha-challenge-item" *ngFor="let challenge of sessionSummary.completed_challenges; let i = index">
+            <div class="ha-challenge-header">
+              <span class="ha-challenge-number">{{ i + 1 }}</span>
+              <span class="ha-challenge-name">{{ challenge['challenge'] | titlecase }}</span>
+              <span class="ha-challenge-time">{{ challenge['response_time'] | number:'1.1-1' }}s</span>
+            </div>
+            <div class="ha-challenge-score" [class]="getScoreClass(challenge['score'])">
+              Score: {{ (challenge['score'] * 100) | number:'1.1-1' }}%
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Session Statistics -->
+      <div class="ha-summary-section">
+        <h3 class="ha-section-title">Session Statistics</h3>
+        <div class="ha-summary-grid">
+          <div class="ha-summary-item">
+            <span class="ha-label">Duration:</span>
+            <span class="ha-value">{{ sessionSummary.session_duration | number:'1.1-1' }}s</span>
+          </div>
+          <div class="ha-summary-item">
+            <span class="ha-label">Frames Processed:</span>
+            <span class="ha-value">{{ sessionSummary.frames_processed }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ha-summary-actions">
+      <button class="ha-btn secondary" (click)="resetSession()">
+        <span class="ha-btn-ic" aria-hidden="true">↻</span>
+        Start New Session
+      </button>
+    </div>
+  </div>
+
   <!-- Controls -->
-  <div class="ha-controls">
+  <div class="ha-controls" [class.hidden]="sessionSummary && result?.authenticated">
     <button class="ha-btn primary" (click)="start()" [disabled]="running">
       <span class="ha-btn-ic" aria-hidden="true">▶</span>
       Start
@@ -54,7 +187,7 @@
       Stop
     </button>
 
-    <button class="ha-btn secondary" (click)="reload()" [disabled]="!running">
+    <button class="ha-btn secondary" (click)="reload()" [disabled]="!canReload">
       <span class="ha-btn-ic" aria-hidden="true">↻</span>
       Reload
     </button>

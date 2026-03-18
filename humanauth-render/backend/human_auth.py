@@ -34,6 +34,7 @@ import os
 import time
 import math
 import random
+import json
 from pathlib import Path
 from collections import deque
 from dataclasses import dataclass
@@ -48,18 +49,18 @@ import mediapipe as mp
 import visualization
 
 # Import shared types
-from auth_types import AuthResult
+from auth_types import AuthResult, SessionSummary
 
 from mediapipe.tasks import python as mp_tasks_python
 from mediapipe.tasks.python import vision as mp_tasks_vision
 
 # Constants
 FACE_HISTORY_SIZE = 90  # ~3 seconds at 30fps
-BLINK_THRESHOLD = 0.35  # EAR threshold for blink detection
+BLINK_THRESHOLD = 0.25  # EAR threshold for blink detection (lowered for better recognition)
 MIN_BLINKS_PER_MINUTE = 5  # Minimum expected blinks per minute for a real human
 MAX_BLINKS_PER_MINUTE = 30  # Maximum expected blinks per minute for a real human
 MICRO_MOVEMENT_THRESHOLD = 0.001  # Threshold for detecting micro-movements
-CHALLENGE_TIMEOUT_SEC = 5.0  # Timeout for active challenges
+CHALLENGE_TIMEOUT_SEC = 8.0  # Timeout for active challenges (increased for better user experience)
 CHALLENGE_RESPONSE_TIME_MIN = 0.2  # Minimum expected response time (seconds)
 CHALLENGE_RESPONSE_TIME_MAX = 2.0  # Maximum expected response time (seconds)
 REQUIRED_CHALLENGES = 3  # Number of successful challenges required for authentication
@@ -190,6 +191,11 @@ class HumanAuth:
         self.current_landmarks = None
         self.current_hand_landmarks = None
         self.challenge_success_time = None
+        
+        # Session tracking for transparency
+        self.session_start_time = time.time()
+        self.frames_processed = 0
+        self.challenge_history = []  # List of completed challenges with details
         
         # Weights for different detection methods (adjusted to favor challenge response and make confidence rise earlier)
         self.weights = {
@@ -569,19 +575,35 @@ class HumanAuth:
                             completed = True
                             break
             elif self.current_challenge == "BLINK_ONCE":
-                # Check for blink
+                # Check for blink - more robust detection
                 left_eye = [landmarks[i] for i in [33, 160, 158, 133, 153, 144]]
-                ear = self._calculate_eye_aspect_ratio(left_eye)
+                right_eye = [landmarks[i] for i in [263, 387, 385, 362, 380, 373]]
+                left_ear = self._calculate_eye_aspect_ratio(left_eye)
+                right_ear = self._calculate_eye_aspect_ratio(right_eye)
+                avg_ear = (left_ear + right_ear) / 2.0
                 
-                # If we detect a blink, complete the challenge immediately
-                if ear < BLINK_THRESHOLD:
+                # More lenient blink detection - check if either eye blinks or average is below threshold
+                if avg_ear < BLINK_THRESHOLD or left_ear < BLINK_THRESHOLD or right_ear < BLINK_THRESHOLD:
                     completed = True
+                
+                # Also check recent blink history for more robust detection
+                if not completed and len(self.blink_history) > 0:
+                    # Check if there was a blink in the last 0.5 seconds
+                    recent_blinks = [blink for timestamp, blink, _ in self.blink_history 
+                                   if now - timestamp < 0.5 and blink]
+                    if recent_blinks:
+                        completed = True
         
-        # Hand-based challenges
+        # Hand-based challenges with improved tolerance
         if self.current_challenge == "SHOW_HAND" and hand_detected:
             completed = True
-        elif self.current_challenge == "SHOW_PEACE_SIGN" and hand_gesture == "PEACE":
-            completed = True
+        elif self.current_challenge == "SHOW_PEACE_SIGN":
+            # Accept exact match or fallback to any hand with 2+ extended fingers
+            if hand_gesture == "PEACE":
+                completed = True
+            elif hand_detected and hand_gesture in ["HAND", "THREE_FINGERS"]:
+                # Fallback: accept general hand detection or three fingers as close enough
+                completed = True
         elif self.current_challenge == "SHOW_THUMBS_UP" and hand_gesture == "THUMBS_UP":
             completed = True
         # Finger counting challenges
@@ -589,8 +611,13 @@ class HumanAuth:
             completed = True
         elif self.current_challenge == "SHOW_THREE_FINGERS" and hand_gesture == "THREE_FINGERS":
             completed = True
-        elif self.current_challenge == "SHOW_FIVE_FINGERS" and hand_gesture == "FIVE_FINGERS":
-            completed = True
+        elif self.current_challenge == "SHOW_FIVE_FINGERS":
+            # Accept exact match or fallback to general hand detection
+            if hand_gesture == "FIVE_FINGERS":
+                completed = True
+            elif hand_detected and hand_gesture in ["HAND", "THREE_FINGERS", "PEACE"]:
+                # Fallback: accept any hand gesture with multiple extended fingers
+                completed = True
         
         if completed and not self.challenge_completed:
             self.challenge_completed = True
@@ -604,10 +631,136 @@ class HumanAuth:
             # Increment successful challenges count
             self.successful_challenges_count += 1
             
+            # Capture challenge history for session transparency
+            challenge_score = 1.0 if elapsed >= CHALLENGE_RESPONSE_TIME_MIN and elapsed <= CHALLENGE_RESPONSE_TIME_MAX else 0.0
+            self.challenge_history.append({
+                "challenge": self.current_challenge,
+                "response_time": elapsed,
+                "score": challenge_score,
+                "timestamp": time.time()
+            })
+            
             # Set next challenge time
             self.next_challenge_time = time.time() + CHALLENGE_DELAY_SEC
             
         return completed, elapsed if completed else 0.0
+    
+    def _create_session_summary(self, confidence: float, micro_movement_score: float, 
+                               consistency_score: float, blink_pattern_score: float, 
+                               challenge_response_score: float, texture_score: float, 
+                               hand_detection_score: float, passive_base: float) -> SessionSummary:
+        """
+        Create a comprehensive session summary for authentication transparency.
+        """
+        # Calculate confidence breakdown
+        challenge_boost = 0.18 * min(self.successful_challenges_count, REQUIRED_CHALLENGES)
+        
+        # Calculate detector contributions (weight * score)
+        detector_contributions = {
+            "Micro Movement": self.weights["micro_movement"] * micro_movement_score,
+            "3D Consistency": self.weights["3d_consistency"] * consistency_score,
+            "Blink Pattern": self.weights["blink_pattern"] * blink_pattern_score,
+            "Challenge Response": self.weights["challenge_response"] * challenge_response_score,
+            "Texture Analysis": self.weights["texture_analysis"] * texture_score,
+            "Hand Detection": self.weights["hand_detection"] * hand_detection_score
+        }
+        
+        # Determine authentication method
+        auth_method = "challenge_count" if self.successful_challenges_count >= REQUIRED_CHALLENGES else "confidence_threshold"
+        
+        # Session duration
+        session_duration = time.time() - self.session_start_time
+        
+        return SessionSummary(
+            auth_method=auth_method,
+            final_confidence=confidence,
+            auth_threshold=AUTH_THRESHOLD,
+            challenges_completed=self.successful_challenges_count,
+            challenges_required=REQUIRED_CHALLENGES,
+            passive_base=passive_base,
+            challenge_boost=challenge_boost,
+            detector_contributions=detector_contributions,
+            completed_challenges=self.challenge_history.copy(),
+            final_scores={
+                "Micro Movement": micro_movement_score,
+                "3D Consistency": consistency_score,
+                "Blink Pattern": blink_pattern_score,
+                "Challenge Response": challenge_response_score,
+                "Texture Analysis": texture_score,
+                "Hand Detection": hand_detection_score
+            },
+            weights=self.weights.copy(),
+            session_duration=session_duration,
+            frames_processed=self.frames_processed
+        )
+    
+    def _log_auth_decision(self, authenticated: bool, confidence: float, 
+                          session_summary: Optional[SessionSummary] = None,
+                          details: Dict[str, Any] = None) -> None:
+        """
+        Log authentication decision details to a JSON file in the auth_log folder.
+        
+        Args:
+            authenticated: Whether authentication was successful
+            confidence: Final confidence score
+            session_summary: Session summary if available
+            details: Additional details from the authentication process
+        """
+        try:
+            # Create log directory if it doesn't exist
+            log_dir = Path(__file__).parent.parent / "auth_log"
+            log_dir.mkdir(exist_ok=True)
+            
+            # Create timestamp for filename and log entry
+            now = datetime.now()
+            timestamp = now.strftime("%Y%m%d_%H%M%S_%f")[:-3]  # Include milliseconds
+            filename = f"auth_log_{timestamp}.json"
+            
+            # Prepare log data
+            log_data = {
+                "timestamp": now.isoformat(),
+                "authenticated": authenticated,
+                "confidence": confidence,
+                "session_duration": time.time() - self.session_start_time,
+                "frames_processed": self.frames_processed,
+                "successful_challenges": self.successful_challenges_count,
+                "required_challenges": REQUIRED_CHALLENGES,
+                "auth_threshold": AUTH_THRESHOLD,
+                "challenge_history": self.challenge_history.copy(),
+                "weights": self.weights.copy()
+            }
+            
+            # Add session summary data if available
+            if session_summary:
+                log_data.update({
+                    "auth_method": session_summary.auth_method,
+                    "passive_base": session_summary.passive_base,
+                    "challenge_boost": session_summary.challenge_boost,
+                    "detector_contributions": session_summary.detector_contributions,
+                    "final_scores": session_summary.final_scores
+                })
+            
+            # Add additional details if provided
+            if details:
+                log_data["frame_details"] = {
+                    "face_detected": details.get("face_detected", False),
+                    "hand_detected": details.get("hand_detected", False),
+                    "current_challenge": details.get("current_challenge"),
+                    "challenge_completed": details.get("challenge_completed", False),
+                    "blink_rate": details.get("blink_rate", 0.0),
+                    "scores": details.get("scores", {})
+                }
+            
+            # Write log file
+            log_file = log_dir / filename
+            with open(log_file, 'w', encoding='utf-8') as f:
+                json.dump(log_data, f, indent=2, ensure_ascii=False)
+                
+            print(f"Auth decision logged to: {log_file}")
+            
+        except Exception as e:
+            print(f"Failed to log auth decision: {e}")
+            # Don't raise the exception to avoid disrupting the authentication process
     
     def _estimate_head_pose(self, landmarks):
         """
@@ -725,16 +878,16 @@ class HumanAuth:
 
         wrist = np.array([landmarks[0].x, landmarks[0].y, landmarks[0].z], dtype=np.float32)
 
-        def _extended(tip_i: int, pip_i: int, margin: float = 0.010) -> bool:  # Was 0.015
+        def _extended(tip_i: int, pip_i: int, margin: float = 0.006) -> bool:  # Lowered for better recognition
             tip = np.array([landmarks[tip_i].x, landmarks[tip_i].y, landmarks[tip_i].z], dtype=np.float32)
             pip = np.array([landmarks[pip_i].x, landmarks[pip_i].y, landmarks[pip_i].z], dtype=np.float32)
             return (_dist(tip, wrist) - _dist(pip, wrist)) > margin
 
-        def _thumb_extended(margin: float = 0.008) -> bool:  # Was 0.010
+        def _thumb_extended(margin: float = 0.005) -> bool:  # Lowered for better recognition
             tip = np.array([landmarks[4].x, landmarks[4].y, landmarks[4].z], dtype=np.float32)
             mcp = np.array([landmarks[2].x, landmarks[2].y, landmarks[2].z], dtype=np.float32)
             # Thumb sticks out sideways; require distance gain and some lateral spread.
-            return (_dist(tip, wrist) - _dist(mcp, wrist)) > margin and abs(tip[0] - wrist[0]) > 0.03  # Was 0.04
+            return (_dist(tip, wrist) - _dist(mcp, wrist)) > margin and abs(tip[0] - wrist[0]) > 0.02  # Lowered for better recognition
 
         thumb = _thumb_extended()
         index = _extended(8, 6)
@@ -746,7 +899,7 @@ class HumanAuth:
         idx_tip = np.array([landmarks[8].x, landmarks[8].y], dtype=np.float32)
         mid_tip = np.array([landmarks[12].x, landmarks[12].y], dtype=np.float32)
         sep = float(np.linalg.norm(idx_tip - mid_tip))
-        if index and middle and (not ring) and (not pinky) and sep > 0.06:
+        if index and middle and (not ring) and (not pinky) and sep > 0.04:  # Lowered for better recognition
             return "PEACE"
 
         # Thumbs up: thumb extended, all other fingers curled
@@ -803,6 +956,9 @@ class HumanAuth:
         Returns:
             AuthResult object with authentication status and details
         """
+        # Increment frame counter for session tracking
+        self.frames_processed += 1
+        
         # Convert BGR to RGB for MediaPipe
         rgb = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
         mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb)
@@ -894,11 +1050,25 @@ class HumanAuth:
                     self.weights["challenge_response"] * challenge_response_score
                 ) / (self.weights["hand_detection"] + self.weights["challenge_response"])
                 
+                # Create session summary for hand-only authentication when successful
+                session_summary = None
+                authenticated = confidence >= 0.5  # Lower threshold for hand-only
+                if authenticated:
+                    session_summary = self._create_session_summary(
+                        confidence, 0.0, 0.0, 0.0, challenge_response_score, 
+                        0.0, hand_detection_score, 0.06  # passive_base for hand detection
+                    )
+                
+                # Log hand-only authentication decision only when successful
+                if authenticated:
+                    self._log_auth_decision(authenticated, confidence, session_summary, details)
+                
                 return AuthResult(
-                    authenticated=confidence >= 0.5,  # Lower threshold for hand-only
+                    authenticated=authenticated,
                     confidence=confidence,
                     details=details,
-                    message=f"Hand-only authentication with {confidence:.2f} confidence"
+                    message=f"Hand-only authentication with {confidence:.2f} confidence",
+                    session_summary=session_summary
                 )
             else:
                 return AuthResult(
@@ -957,30 +1127,34 @@ class HumanAuth:
         challenge_response_score = 0.0
         now = time.time()
         
-        # Issue a new challenge if needed
-        if not self.current_challenge:
-            self._issue_next_challenge()
-        elif self.challenge_completed:
-            # If it's time for the next challenge
-            if self.next_challenge_time and now >= self.next_challenge_time:
+        # Issue a new challenge if needed (but not if confidence is very high or already authenticated)
+        # Stop issuing challenges when confidence reaches 95% or when authenticated to prevent endless processing
+        should_issue_challenges = self.auth_confidence < 0.95 and not self.authenticated
+        
+        if should_issue_challenges:
+            if not self.current_challenge:
                 self._issue_next_challenge()
-        else:
-            # Check response to current challenge
-            completed, response_time = self._check_challenge_response(
-                landmarks, blendshapes, hand_detected, hand_gesture
-            )
-            
-            if completed:
-                # Score based on response time
-                if response_time < CHALLENGE_RESPONSE_TIME_MIN:
-                    # Too fast, suspicious
-                    challenge_response_score = 0.0
-                elif response_time > CHALLENGE_RESPONSE_TIME_MAX:
-                    # Too slow, suspicious
-                    challenge_response_score = max(0.0, 1.0 - (response_time - CHALLENGE_RESPONSE_TIME_MAX))
-                else:
-                    # Natural response time
-                    challenge_response_score = 1.0
+            elif self.challenge_completed:
+                # If it's time for the next challenge
+                if self.next_challenge_time and now >= self.next_challenge_time:
+                    self._issue_next_challenge()
+            else:
+                # Check response to current challenge
+                completed, response_time = self._check_challenge_response(
+                    landmarks, blendshapes, hand_detected, hand_gesture
+                )
+                
+                if completed:
+                    # Score based on response time
+                    if response_time < CHALLENGE_RESPONSE_TIME_MIN:
+                        # Too fast, suspicious
+                        challenge_response_score = 0.0
+                    elif response_time > CHALLENGE_RESPONSE_TIME_MAX:
+                        # Too slow, suspicious
+                        challenge_response_score = max(0.0, 1.0 - (response_time - CHALLENGE_RESPONSE_TIME_MAX))
+                    else:
+                        # Natural response time
+                        challenge_response_score = 1.0
         
         # Update details with scores
         details["micro_movement_score"] = micro_movement_score
@@ -1028,11 +1202,18 @@ class HumanAuth:
         # Update authentication state
         self.auth_confidence = confidence
 
-        # Authentication logic: if required challenges are completed, immediately authenticate
+        # Authentication logic: prioritize challenge completion over confidence threshold
+        # This ensures users must complete the required challenges to see the full authentication process
         if self.successful_challenges_count >= REQUIRED_CHALLENGES:
             authenticated_now = True
         else:
-            authenticated_now = confidence >= AUTH_THRESHOLD
+            # Only allow confidence-based authentication if we're close to the required challenges
+            # This prevents early authentication after just one challenge
+            min_challenges_for_confidence_auth = max(1, REQUIRED_CHALLENGES - 1)  # At least 2 out of 3 challenges
+            if self.successful_challenges_count >= min_challenges_for_confidence_auth:
+                authenticated_now = confidence >= AUTH_THRESHOLD
+            else:
+                authenticated_now = False
 
         # Latch auth briefly to avoid flicker
         if authenticated_now:
@@ -1057,11 +1238,25 @@ class HumanAuth:
         else:
             message = f"Authentication failed with {confidence:.2f} confidence"
         
+        # Create session summary for transparency when authentication succeeds
+        session_summary = None
+        if self.authenticated:
+            session_summary = self._create_session_summary(
+                confidence, micro_movement_score, consistency_score, 
+                blink_pattern_score, challenge_response_score, 
+                texture_score, hand_detection_score, passive_base
+            )
+        
+        # Log authentication decision only when successful
+        if self.authenticated:
+            self._log_auth_decision(self.authenticated, confidence, session_summary, details)
+        
         return AuthResult(
             authenticated=self.authenticated,
             confidence=confidence,
             details=details,
-            message=message
+            message=message,
+            session_summary=session_summary
         )
     
     

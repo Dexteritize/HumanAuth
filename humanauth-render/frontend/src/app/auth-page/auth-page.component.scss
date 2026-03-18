@@ -162,45 +162,6 @@
   padding: 20px;
 }
 
-.ha-corner {
-  position: absolute;
-  width: 32px; /* Increased size */
-  height: 32px; /* Increased size */
-  border: 2px solid rgba(255, 255, 255, 0.65); /* More visible */
-  opacity: 0.65; /* More visible */
-}
-
-.ha-corner.tl {
-  top: 20px; /* More spacing */
-  left: 20px; /* More spacing */
-  border-right: 0;
-  border-bottom: 0;
-  border-radius: 12px 0 0 0; /* Larger radius */
-}
-
-.ha-corner.tr {
-  top: 20px; /* More spacing */
-  right: 20px; /* More spacing */
-  border-left: 0;
-  border-bottom: 0;
-  border-radius: 0 12px 0 0; /* Larger radius */
-}
-
-.ha-corner.bl {
-  bottom: 20px; /* More spacing */
-  left: 20px; /* More spacing */
-  border-right: 0;
-  border-top: 0;
-  border-radius: 0 0 0 12px; /* Larger radius */
-}
-
-.ha-corner.br {
-  bottom: 20px; /* More spacing */
-  right: 20px; /* More spacing */
-  border-left: 0;
-  border-top: 0;
-  border-radius: 0 0 12px 0; /* Larger radius */
-}
 
 .ha-hint {
   position: absolute;
@@ -265,40 +226,6 @@
   max-width: 80%;
 }
 
-.ha-live {
-  position: absolute;
-  top: 20px; /* More spacing */
-  left: 20px; /* More spacing */
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 12px; /* More padding */
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.75); /* More opaque */
-  border: 1px solid rgba(255, 255, 255, 0.25); /* More visible border */
-  color: rgba(255, 255, 255, 0.9); /* Brighter text */
-  font-size: 0.95rem; /* Slightly larger */
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
-.ha-pulse {
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  background: rgba(255, 96, 96, 0.95);
-  box-shadow: 0 0 0 0 rgba(255, 96, 96, 0);
-  animation: haPulse 1.25s ease-out infinite;
-}
-
-@keyframes haPulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(255, 96, 96, 0.28);
-  }
-  100% {
-    box-shadow: 0 0 0 12px rgba(255, 96, 96, 0);
-  }
-}
 
 /* Controls */
 .ha-controls {
@@ -498,5 +425,390 @@
   }
   .ha-meter-fill {
     transition: none;
+  }
+}
+
+/* ===== Enhanced Session Summary Panel ===== */
+.ha-summary-panel {
+  margin-top: 20px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(108, 255, 214, 0.15), rgba(230, 126, 95, 0.08));
+  border: 1px solid rgba(108, 255, 214, 0.3);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.3), 0 0 30px rgba(108, 255, 214, 0.1);
+  padding: 24px;
+  color: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  position: relative;
+  overflow: hidden;
+}
+
+.ha-summary-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(108, 255, 214, 0.8), rgba(230, 126, 95, 0.8));
+  border-radius: 18px 18px 0 0;
+}
+
+.ha-summary-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ha-summary-title {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: rgba(255, 255, 255, 0.98);
+  text-shadow: 0 2px 10px rgba(108, 255, 214, 0.3);
+}
+
+/* Quick Stats Cards */
+.ha-quick-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
+  margin: 24px 0;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+}
+
+.ha-stat-card {
+  text-align: center;
+  padding: 16px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.ha-stat-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(108, 255, 214, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.ha-stat-value {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: rgba(108, 255, 214, 0.95);
+  margin-bottom: 6px;
+  text-shadow: 0 2px 8px rgba(108, 255, 214, 0.3);
+}
+
+.ha-stat-label {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ha-summary-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.ha-summary-status.success {
+  background: rgba(108, 255, 214, 0.15);
+  border: 1px solid rgba(108, 255, 214, 0.3);
+  color: rgba(108, 255, 214, 0.95);
+}
+
+.ha-status-icon {
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.ha-summary-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.ha-summary-section {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.ha-section-title {
+  margin: 0 0 16px 0;
+  font-size: 1.1rem;
+  font-weight: 650;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: -0.01em;
+}
+
+.ha-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.ha-summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+}
+
+.ha-label {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+}
+
+.ha-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.ha-value.confidence-high {
+  color: rgba(108, 255, 214, 0.95);
+}
+
+/* Enhanced Detector Analysis Styles */
+.ha-detector-explanation {
+  margin-bottom: 20px;
+  padding: 16px;
+  background: rgba(108, 255, 214, 0.08);
+  border: 1px solid rgba(108, 255, 214, 0.2);
+  border-radius: 12px;
+  
+  p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+}
+
+.ha-detector-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ha-detector-item {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 18px;
+  transition: all 0.3s ease;
+}
+
+.ha-detector-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(108, 255, 214, 0.2);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.ha-detector-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  gap: 16px;
+}
+
+.ha-detector-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ha-detector-name {
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 1.1rem;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.ha-detector-description {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.65);
+  line-height: 1.4;
+  display: block;
+}
+
+.ha-detector-metrics {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  min-width: 80px;
+}
+
+.ha-detector-score {
+  font-weight: 700;
+  font-size: 1.1rem;
+  padding: 6px 10px;
+  border-radius: 8px;
+  min-width: 60px;
+  text-align: center;
+}
+
+.ha-detector-bar {
+  width: 80px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.ha-detector-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.8s ease;
+}
+
+.ha-detector-details {
+  display: flex;
+  gap: 16px;
+  font-size: 0.85rem;
+}
+
+.ha-detector-detail {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Challenge History Styles */
+.ha-challenge-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ha-challenge-item {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.ha-challenge-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.ha-challenge-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: rgba(230, 126, 95, 0.2);
+  border: 1px solid rgba(230, 126, 95, 0.4);
+  border-radius: 50%;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: rgba(230, 126, 95, 0.9);
+}
+
+.ha-challenge-name {
+  flex: 1;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.ha-challenge-time {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+}
+
+.ha-challenge-score {
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+/* Score-based color classes */
+.score-high {
+  background: rgba(108, 255, 214, 0.15);
+  color: rgba(108, 255, 214, 0.95);
+}
+
+.score-medium {
+  background: rgba(255, 214, 102, 0.15);
+  color: rgba(255, 214, 102, 0.95);
+}
+
+.score-low {
+  background: rgba(255, 165, 102, 0.15);
+  color: rgba(255, 165, 102, 0.95);
+}
+
+.score-very-low {
+  background: rgba(255, 96, 96, 0.15);
+  color: rgba(255, 96, 96, 0.95);
+}
+
+/* Summary Actions */
+.ha-summary-actions {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: center;
+}
+
+/* Hide controls when summary is shown */
+.ha-controls.hidden {
+  display: none;
+}
+
+/* Responsive adjustments for summary */
+@media (max-width: 720px) {
+  .ha-summary-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .ha-summary-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  
+  .ha-detector-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  
+  .ha-challenge-header {
+    flex-wrap: wrap;
+  }
+  
+  .ha-detector-details {
+    flex-direction: column;
+    gap: 4px;
   }
 }

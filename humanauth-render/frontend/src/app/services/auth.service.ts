@@ -2,11 +2,28 @@ import { Injectable } from "@angular/core";
 import { HttpClient, HttpHeaders, HttpErrorResponse } from "@angular/common/http";
 import { firstValueFrom } from "rxjs";
 
+export interface SessionSummary {
+  auth_method: string;
+  final_confidence: number;
+  auth_threshold: number;
+  challenges_completed: number;
+  challenges_required: number;
+  passive_base: number;
+  challenge_boost: number;
+  detector_contributions: Record<string, number>;
+  completed_challenges: Array<Record<string, any>>;
+  final_scores: Record<string, number>;
+  weights: Record<string, number>;
+  session_duration: number;
+  frames_processed: number;
+}
+
 export interface AuthResult {
   authenticated: boolean;
   confidence: number;
   message: string;
   details: Record<string, any>;
+  session_summary?: SessionSummary;
 }
 
 export interface ApiConfig {
