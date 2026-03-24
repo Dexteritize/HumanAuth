@@ -234,8 +234,9 @@ export class AuthPageComponent implements OnDestroy {
         this.processingFrame = true;
         this.processFrameAsync(frame);
       }
-    } catch (e: any) {
-      this.fail(e);
+    } catch {
+      // Reset failed — silently continue so the camera stays live.
+      this.setState(UiState.Running, "Verifying…", "Follow the on-screen challenge.");
     }
   }
 
@@ -261,9 +262,8 @@ export class AuthPageComponent implements OnDestroy {
       } else {
         this.pendingFrame = true;
       }
-    } catch (e: any) {
-      this.fail(e);
-      return;
+    } catch {
+      // Skip this frame on capture error — keep the loop alive.
     }
 
     this.animationFrameId = requestAnimationFrame(() => this.loop());
@@ -311,7 +311,11 @@ export class AuthPageComponent implements OnDestroy {
         this.maybeDebug(result);
       });
     } catch (e: any) {
-      this.fail(e);
+      // Keep running on transient network / backend errors — show a soft status.
+      this.zone.run(() => {
+        this.statusTitle = "Connection issue";
+        this.statusSubtitle = "Retrying…";
+      });
     } finally {
       this.processingFrame = false;
 
@@ -1173,9 +1177,7 @@ export class AuthPageComponent implements OnDestroy {
   }
 
   private onVisibilityChange = () => {
-    if (document.hidden && this.running) {
-      this.stop();
-    }
+    // Do not stop automatically — the user must press Stop or complete all challenges.
   };
 
   private setState(state: UiState, title: string, subtitle: string) {

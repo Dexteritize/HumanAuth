@@ -540,10 +540,6 @@ class HumanAuth:
         now = time.time()
         elapsed = now - self.challenge_start_time
         
-        # Challenge timed out
-        if elapsed > CHALLENGE_TIMEOUT_SEC:
-            return False, 0.0
-            
         # Check if challenge is completed based on the challenge type
         completed = False
         
@@ -1031,15 +1027,11 @@ class HumanAuth:
                     )
                     
                     if completed:
-                        # Score based on response time
+                        # Only penalise inhuman speed (bot detection);
+                        # no upper bound — the user may take as long as they need.
                         if response_time < CHALLENGE_RESPONSE_TIME_MIN:
-                            # Too fast, suspicious
-                            challenge_response_score = 0.0
-                        elif response_time > CHALLENGE_RESPONSE_TIME_MAX:
-                            # Too slow, suspicious
-                            challenge_response_score = max(0.0, 1.0 - (response_time - CHALLENGE_RESPONSE_TIME_MAX))
+                            challenge_response_score = 0.0  # Too fast, suspicious
                         else:
-                            # Natural response time
                             challenge_response_score = 1.0
                 
                 details["challenge_response_score"] = challenge_response_score
@@ -1145,15 +1137,11 @@ class HumanAuth:
                 )
                 
                 if completed:
-                    # Score based on response time
+                    # Only penalise inhuman speed (bot detection);
+                    # no upper bound — the user may take as long as they need.
                     if response_time < CHALLENGE_RESPONSE_TIME_MIN:
-                        # Too fast, suspicious
-                        challenge_response_score = 0.0
-                    elif response_time > CHALLENGE_RESPONSE_TIME_MAX:
-                        # Too slow, suspicious
-                        challenge_response_score = max(0.0, 1.0 - (response_time - CHALLENGE_RESPONSE_TIME_MAX))
+                        challenge_response_score = 0.0  # Too fast, suspicious
                     else:
-                        # Natural response time
                         challenge_response_score = 1.0
         
         # Update details with scores
