@@ -121,7 +121,7 @@ export class AuthPageComponent implements OnDestroy {
   // Optional convenience getters for template bindings
   get canStart() { return this.uiState === UiState.Idle || this.uiState === UiState.Stopped || this.uiState === UiState.Error; }
   get canStop() { return this.uiState === UiState.Running || this.uiState === UiState.Starting; }
-  get canReload() { return this.uiState === UiState.Running; }
+  get canReload() { return true; }
   get isBusy() { return this.uiState === UiState.Starting; }
 
   async start() {
@@ -214,30 +214,8 @@ export class AuthPageComponent implements OnDestroy {
     // Don't change UI state - preserve success state and session summary
   }
 
-  async reload() {
-    if (!this.canReload) return;
-
-    this.error = undefined;
-    this.progressText = "";
-    this.setState(UiState.Running, "Resetting…", "Starting a new challenge sequence.");
-
-    try {
-      this.processingFrame = false;
-      this.pendingFrame = false;
-      this.result = undefined;
-
-      await this.auth.resetAuth();
-
-      // Kick one immediate frame to make reset feel instant
-      if (this.running) {
-        const frame = this.cam.capture(this.video.nativeElement, this.captureCanvas, 0.7);
-        this.processingFrame = true;
-        this.processFrameAsync(frame);
-      }
-    } catch {
-      // Reset failed — silently continue so the camera stays live.
-      this.setState(UiState.Running, "Verifying…", "Follow the on-screen challenge.");
-    }
+  reload() {
+    window.location.reload();
   }
 
   private async loop() {
