@@ -234,8 +234,9 @@ export class AuthPageComponent implements OnDestroy {
         this.processingFrame = true;
         this.processFrameAsync(frame);
       }
-    } catch (e: any) {
-      this.fail(e);
+    } catch {
+      // Reset failed — silently continue so the camera stays live.
+      this.setState(UiState.Running, "Verifying…", "Follow the on-screen challenge.");
     }
   }
 
@@ -261,9 +262,8 @@ export class AuthPageComponent implements OnDestroy {
       } else {
         this.pendingFrame = true;
       }
-    } catch (e: any) {
-      this.fail(e);
-      return;
+    } catch {
+      // Skip this frame on capture error — keep the loop alive.
     }
 
     this.animationFrameId = requestAnimationFrame(() => this.loop());
@@ -311,7 +311,11 @@ export class AuthPageComponent implements OnDestroy {
         this.maybeDebug(result);
       });
     } catch (e: any) {
-      this.fail(e);
+      // Keep running on transient network / backend errors — show a soft status.
+      this.zone.run(() => {
+        this.statusTitle = "Connection issue";
+        this.statusSubtitle = "Retrying…";
+      });
     } finally {
       this.processingFrame = false;
 
@@ -345,21 +349,24 @@ export class AuthPageComponent implements OnDestroy {
     // Soft vignette / dim (feels much better than a flat dark rectangle)
     this.drawVignette(ctx, this.logicalW, this.logicalH);
 
-    // Draw landmarks aligned to mirrored video: flip X in draw space
-    ctx.save();
-    ctx.setTransform(-1, 0, 0, 1, this.logicalW, 0);
+    // Draw landmarks only while verifying — hide them once authorized
+    const isAuthed = !!result.authenticated || (result.details?.["successful_challenges_count"] || 0) >= (result.details?.["required_challenges"] || 3);
+    if (!isAuthed) {
+      ctx.save();
+      ctx.setTransform(-1, 0, 0, 1, this.logicalW, 0);
 
-    const face = result.details?.["face_landmarks"] as Landmark[] | undefined;
-    const hand = result.details?.["hand_landmarks"] as Landmark[] | undefined;
-    const handDetected = !!result.details?.["hand_detected"];
+      const face = result.details?.["face_landmarks"] as Landmark[] | undefined;
+      const hand = result.details?.["hand_landmarks"] as Landmark[] | undefined;
+      const handDetected = !!result.details?.["hand_detected"];
 
-    const smoothFace = this.smoothLandmarks(face, "face");
-    const smoothHand = this.smoothLandmarks(hand, "hand");
+      const smoothFace = this.smoothLandmarks(face, "face");
+      const smoothHand = this.smoothLandmarks(hand, "hand");
 
-    if (smoothFace?.length) this.drawFaceLandmarks(ctx, smoothFace);
-    if (handDetected && smoothHand?.length) this.drawHandLandmarks(ctx, smoothHand);
+      if (smoothFace?.length) this.drawFaceLandmarks(ctx, smoothFace);
+      if (handDetected && smoothHand?.length) this.drawHandLandmarks(ctx, smoothHand);
 
-    ctx.restore();
+      ctx.restore();
+    }
 
     // HUD: auth + progress + challenge
     this.drawHud(ctx, result);
@@ -367,7 +374,7 @@ export class AuthPageComponent implements OnDestroy {
     // Scores (optional panel but styled nicer) - Draw after HUD so it appears on top of success overlay
     const scores = result.details?.["scores"] as Scores | undefined;
     if (scores && Object.keys(scores).length) {
-      this.drawMetricsScores(ctx, scores);
+      this.drawMetricsScores(ctx, scores, isAuthed);
     }
 
     // Detailed analysis panel (draws on top of everything when active)
@@ -440,9 +447,9 @@ export class AuthPageComponent implements OnDestroy {
       // Don't return here - continue to show progress dots and allow metrics to remain visible
     }
 
-    // Challenge prompt (bottom center)
+    // Challenge prompt (bottom center) — hidden once authorized
     const challenge = this.formatChallengeName(result.details?.["current_challenge"]);
-    if (challenge) {
+    if (challenge && !authed) {
       const done = !!result.details?.["challenge_completed"];
       const prompt = done ? "Nice — hold for next prompt…" : challenge;
 
@@ -783,7 +790,7 @@ export class AuthPageComponent implements OnDestroy {
     const h = this.logicalH;
 
     // Points
-    ctx.fillStyle = "rgba(140, 255, 220, 0.95)";
+    ctx.fillStyle = "rgba(140, 255, 220, 0.25)";
     ctx.beginPath();
     for (const p of landmarks) {
       const x = p.x * w;
@@ -794,8 +801,8 @@ export class AuthPageComponent implements OnDestroy {
     ctx.fill();
 
     // Connections
-    ctx.strokeStyle = "rgba(120, 255, 200, 0.65)";
-    ctx.lineWidth = 1.4;
+    ctx.strokeStyle = "rgba(120, 255, 200, 0.18)";
+    ctx.lineWidth = 1.0;
     ctx.beginPath();
     for (const [i, j] of FACE_CONNECTIONS) {
       const a = landmarks[i];
@@ -822,14 +829,14 @@ export class AuthPageComponent implements OnDestroy {
       const x = p.x * w;
       const y = p.y * h;
 
-      let color = "rgba(130, 200, 255, 0.95)";
-      if (i <= 4) color = "rgba(255, 120, 120, 0.95)";
-      else if (i <= 8) color = "rgba(120, 255, 170, 0.95)";
-      else if (i <= 12) color = "rgba(220, 140, 255, 0.95)";
-      else if (i <= 16) color = "rgba(255, 240, 140, 0.95)";
-      else color = "rgba(140, 255, 255, 0.95)";
+      let color = "rgba(130, 200, 255, 0.28)";
+      if (i <= 4) color = "rgba(255, 120, 120, 0.28)";
+      else if (i <= 8) color = "rgba(120, 255, 170, 0.28)";
+      else if (i <= 12) color = "rgba(220, 140, 255, 0.28)";
+      else if (i <= 16) color = "rgba(255, 240, 140, 0.28)";
+      else color = "rgba(140, 255, 255, 0.28)";
 
-      ctx.shadowColor = color.replace("0.95", "0.45");
+    ctx.shadowColor = color.replace("0.28", "0.1");
       ctx.fillStyle = color;
 
       ctx.beginPath();
@@ -839,7 +846,7 @@ export class AuthPageComponent implements OnDestroy {
 
     // Connections
     ctx.shadowBlur = 0;
-    ctx.lineWidth = 2.6;
+    ctx.lineWidth = 1.4;
 
     for (const [i, j] of HAND_CONNECTIONS) {
       const a = landmarks[i];
@@ -847,12 +854,12 @@ export class AuthPageComponent implements OnDestroy {
       if (!a || !b) continue;
 
       // finger-ish coloring
-      let color = "rgba(130, 200, 255, 0.85)";
-      if (i <= 4 || j <= 4) color = "rgba(255, 120, 120, 0.85)";
-      else if (i <= 8 || j <= 8) color = "rgba(120, 255, 170, 0.85)";
-      else if (i <= 12 || j <= 12) color = "rgba(220, 140, 255, 0.85)";
-      else if (i <= 16 || j <= 16) color = "rgba(255, 240, 140, 0.85)";
-      else color = "rgba(140, 255, 255, 0.85)";
+      let color = "rgba(130, 200, 255, 0.22)";
+      if (i <= 4 || j <= 4) color = "rgba(255, 120, 120, 0.22)";
+      else if (i <= 8 || j <= 8) color = "rgba(120, 255, 170, 0.22)";
+      else if (i <= 12 || j <= 12) color = "rgba(220, 140, 255, 0.22)";
+      else if (i <= 16 || j <= 16) color = "rgba(255, 240, 140, 0.22)";
+      else color = "rgba(140, 255, 255, 0.22)";
 
       ctx.strokeStyle = color;
       ctx.beginPath();
@@ -865,21 +872,23 @@ export class AuthPageComponent implements OnDestroy {
   }
 
   // Enhanced metrics panel with educational information and responsive sizing
-  drawMetricsScores(ctx: CanvasRenderingContext2D, scores: Scores) {
+  drawMetricsScores(ctx: CanvasRenderingContext2D, scores: Scores, authed = false) {
     const entries = Object.entries(scores);
     if (!entries.length) return;
 
     // Sort entries by score (highest first) for better educational value
     const sortedEntries = entries.sort(([, a], [, b]) => b - a);
 
-    // Responsive sizing based on canvas dimensions
-    const scale = Math.min(this.logicalW / 800, this.logicalH / 600, 1.2);
-    const panelX = 16 * scale;
-    const panelY = 78 * scale;
-    const rowH = 32 * scale; // Increased row height for better readability
-    const headerH = 36 * scale; // Increased header height
-    const panelW = Math.min(380 * scale, this.logicalW * 0.45); // Responsive width, max 45% of canvas
+    // When authorized: compact panel in bottom-left. Otherwise: normal top-left panel.
+    const scale = authed
+      ? Math.min(this.logicalW / 800, this.logicalH / 600, 1.2) * 0.65
+      : Math.min(this.logicalW / 800, this.logicalH / 600, 1.2);
+    const rowH = 32 * scale;
+    const headerH = 36 * scale;
+    const panelW = Math.min(380 * scale, this.logicalW * 0.45);
     const panelH = headerH + sortedEntries.length * rowH + 18 * scale;
+    const panelX = authed ? 16 : 16 * scale;
+    const panelY = authed ? this.logicalH - panelH - 16 : 78 * scale;
 
     ctx.save();
 
@@ -1173,9 +1182,7 @@ export class AuthPageComponent implements OnDestroy {
   }
 
   private onVisibilityChange = () => {
-    if (document.hidden && this.running) {
-      this.stop();
-    }
+    // Do not stop automatically — the user must press Stop or complete all challenges.
   };
 
   private setState(state: UiState, title: string, subtitle: string) {
