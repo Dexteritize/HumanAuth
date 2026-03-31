@@ -1,209 +1,479 @@
-# HumanAuth
+# HumanAuth - Biometric Authentication System
 
-HumanAuth is a web-based human authentication demo that combines real-time face and hand landmark detection, challenge-response liveness checks, and low-latency WebSocket communication. This repository contains the frontend (Angular) and backend (Python) components, model files for MediaPipe-style processing, and helper scripts to run the demo. The project is located in the `humanauth-web` directory and should be run using the `start.sh` script.
+A comprehensive full-stack human authentication system that uses advanced biometric verification through real-time face and hand landmark detection. This system provides secure, contactless authentication using computer vision and machine learning technologies.
 
-## Table of Contents
+## What is HumanAuth?
 
-1. Overview
-2. High-level Architecture
-3. Component Details
-4. Data Flow
-5. Local Setup \& Quick Start
-6. Configuration
-7. Performance \& Optimization
-8. Security Considerations
-9. Testing \& CI
-10. Deployment Suggestions
-11. Project Layout
-12. Contributing
-13. License
+HumanAuth is a cutting-edge biometric authentication system that verifies human identity through:
+- **Face Landmark Detection**: Analyzes facial features and expressions
+- **Hand Landmark Detection**: Tracks hand movements and gestures
+- **Real-time Processing**: Processes webcam frames in real-time for continuous verification
+- **Multi-factor Biometric**: Combines multiple biometric factors for enhanced security
+- **Session-based Authentication**: Maintains secure authentication sessions
 
-## 1. Overview
+The system is designed for applications requiring secure, contactless authentication such as access control, identity verification, and secure login systems.
 
-HumanAuth demonstrates a full stack system that performs human authentication by verifying live face and hand gestures. It uses on-server model processing for landmark extraction and a rich Angular frontend for capture, visualization, and user interaction.
+## System Architecture
 
-## 2. High-level Architecture
+### Backend (Flask REST API)
+- **Framework**: Flask with CORS support
+- **Authentication**: API key-based authentication with rate limiting
+- **Biometric Processing**: MediaPipe-based face and hand landmark detection
+- **Session Management**: Real-time session handling for continuous authentication
+- **Model Files**: Pre-trained MediaPipe models for landmark detection
 
-- Frontend: Angular application responsible for camera capture, rendering face/hand meshes, user challenge UI, and communicating with the backend over WebSocket/HTTP.
-- Backend: Python server (lightweight web framework such as Flask or FastAPI) that hosts MediaPipe-style model tasks, processes incoming frames, performs landmark extraction and liveness heuristics, and returns results in real time.
-- Models: Prebuilt task files such as `face_landmarker.task` and `hand_landmarker.task` stored in the backend and loaded by the processing pipeline.
-- Transport: WebSocket for low-latency, bidirectional streaming of frames and results; optional HTTP endpoints for health checks, configuration, or session management.
-- Start script: `start.sh` in `humanauth-web` to orchestrate environment setup and start both servers.
+### Frontend (Angular Application)
+- **Framework**: Angular with TypeScript
+- **Camera Integration**: WebRTC-based camera access
+- **Real-time Visualization**: Live landmark visualization and authentication feedback
+- **Responsive UI**: Modern, responsive interface with real-time status updates
+- **Session Management**: Client-side session handling and state management
 
-## 3. Component Details
+### Key Components
+```
+HumanAuth-FullStack/
+├── backend/                    # Flask REST API server
+│   ├── app.py                 # Main Flask application
+│   ├── human_auth.py          # Core biometric authentication logic
+│   ├── face_landmarker.task   # MediaPipe face detection model
+│   ├── hand_landmarker.task   # MediaPipe hand detection model
+│   └── requirements.txt       # Python dependencies
+├── frontend/                   # Angular web application
+│   ├── src/app/
+│   │   ├── auth-page/         # Main authentication component
+│   │   ├── services/          # Angular services (camera, auth)
+│   │   └── environments/      # Environment configurations
+│   └── package.json           # Node.js dependencies
+├── tests/                      # Comprehensive test suite
+│   ├── backend/               # Backend unit tests
+│   ├── frontend/              # Frontend component tests
+│   ├── integration/           # Integration tests
+│   ├── security/              # Security vulnerability tests
+│   └── performance/           # Load and performance tests
+└── start.sh                   # Automated startup script
+```
 
-Frontend (`humanauth-web/frontend`)
-- Angular app (served on port `4200` by default).
-- Key files:
-  - `frontend/src/app/auth-page/auth-page.component.ts` — main UI, challenge flow, visualization hooks.
-  - `frontend/src/app/auth-page/auth-page.component.scss` — layout and CSS optimizations (video size, hardware-acceleration hints).
-  - `frontend/src/app/services/camera.service.ts` — camera capture parameters (resolution, image quality, capture frequency).
-- Responsibilities:
-  - Acquire webcam frames via `getUserMedia`.
-  - Draw camera preview and landmark visualizations on canvases.
-  - Send capture frames to backend over WebSocket and apply server results to UI.
+## How Biometric Authentication Works
 
-Backend (`humanauth-web/backend`)
-- Python 3.8+ app (run `python app.py` in development).
-- Key files:
-  - `app.py` — server entrypoint, WebSocket handlers, model loader.
-  - `requirements.txt` — Python dependencies (WebSocket, MediaPipe or wrapper, image utilities).
-  - Model files: `face_landmarker.task`, `hand_landmarker.task`.
-- Responsibilities:
-  - Accept image frames via WebSocket.
-  - Run model inference to return face/hand landmarks and liveness flags.
-  - Maintain lightweight session/challenge state for each connected client.
-  - Optionally provide HTTP endpoints for health and configuration.
+### 1. Face Landmark Detection
+- **68-point facial landmark detection** using MediaPipe
+- **Real-time face tracking** with position, orientation, and expression analysis
+- **Liveness detection** to prevent spoofing attacks
+- **Facial feature analysis** including eye movement, mouth movement, and head pose
 
-Start script
-- `start.sh` in `humanauth-web`:
-  1. Checks dependencies
-  2. Verifies model files exist
-  3. Creates / activates Python venv and installs backend dependencies
-  4. Launches backend then frontend dev server
+### 2. Hand Landmark Detection
+- **21-point hand landmark detection** per hand
+- **Gesture recognition** and hand movement tracking
+- **Multi-hand support** for enhanced security
+- **Hand pose analysis** including finger positions and palm orientation
 
-## 4. Data Flow
+### 3. Authentication Process
+1. **Session Initialization**: Create secure authentication session
+2. **Camera Activation**: Access user's webcam with permission
+3. **Real-time Processing**: Continuously process video frames
+4. **Biometric Analysis**: Extract and analyze face/hand landmarks
+5. **Confidence Scoring**: Calculate authentication confidence scores
+6. **Decision Making**: Authenticate based on configurable thresholds
+7. **Session Management**: Maintain authentication state throughout session
 
-1. User opens `http://localhost:4200` in browser.
-2. Frontend requests camera access and captures frames at configured resolution (default `1280x720`).
-3. Frames (or compressed frames) are sent to the backend via WebSocket.
-4. Backend runs the loaded model tasks to detect face/hand landmarks and runs liveness heuristics (challenge matching, motion consistency).
-5. Backend sends a compact JSON result payload back over WebSocket containing:
-   - Landmarks (arrays of normalized coordinates)
-   - Liveness / challenge result
-   - Visualization hints (colors, indices)
-6. Frontend updates visualization, challenge progress, and authentication state.
+### 4. Security Features
+- **Anti-spoofing**: Liveness detection prevents photo/video attacks
+- **Multi-factor**: Combines face and hand biometrics for enhanced security
+- **Rate limiting**: Prevents brute force attacks
+- **Session timeout**: Automatic session expiration for security
+- **Encrypted communication**: HTTPS/WSS for secure data transmission
 
-## 5. Local Setup \& Quick Start
+## Quick Start Guide
 
-**Important:** The recommended way to run HumanAuth is using the `start.sh` script in the `humanauth-web` directory. This script handles all necessary setup, dependency installation, and server startup automatically.
+### Prerequisites
+- **Python 3.8+** with pip
+- **Node.js 16+** with npm
+- **Webcam** (built-in or external)
+- **Modern web browser** (Chrome, Firefox, Safari, Edge)
 
-From repository root:
+### Option 1: Using start.sh (Recommended)
 
-1. Navigate to `humanauth-web`:
-   ```
-   cd humanauth-web
-   ```
-2. Make the start script executable and run it:
-   ```
-   chmod +x start.sh
-   ./start.sh
-   ```
-3. Open your browser and navigate to `http://localhost:4200`
+The easiest way to run HumanAuth is using the provided startup script:
 
-The script will:
-- Check for required dependencies (Python 3, Node.js, npm)
-- Verify model files exist
-- Set up a Python virtual environment if needed
-- Install/update all dependencies
-- Start both backend and frontend servers
-- Provide clean shutdown with Ctrl+C
+```bash
+# Clone and navigate to the project
+cd HumanAuth-FullStack
 
-**Note:** The `localdemo` directory in the repository root should be ignored. Use the `humanauth-web` directory and its `start.sh` script instead.
+# Make the script executable (Linux/macOS)
+chmod +x start.sh
 
-### Alternative: Manual Startup
+# Run in development mode (default)
+./start.sh
 
-If you need to start the servers manually (not recommended for most users):
+# Or explicitly specify development mode
+./start.sh --dev
 
-Backend
-- `cd humanauth-web/backend`
-- `python3 -m venv venv`
-- `source venv/bin/activate`
-- `pip install -r requirements.txt`
-- Ensure `face_landmarker.task` and `hand_landmarker.task` are in the backend directory
-- `python app.py` (server listens on port `8000` by default)
+# Run in production mode
+./start.sh --prod
 
-Frontend
-- `cd humanauth-web/frontend`
-- `npm install`
-- `npm start` (serves on `http://localhost:4200`)
+# Get help
+./start.sh --help
+```
 
-## 6. Configuration
+The `start.sh` script will:
+- ✅ Check for required dependencies (Python, Node.js, npm)
+- ✅ Verify model files are present
+- ✅ Create Python virtual environment if needed
+- ✅ Install/update all dependencies automatically
+- ✅ Generate API keys for development
+- ✅ Configure environment settings
+- ✅ Start both backend and frontend servers
+- ✅ Provide cleanup on exit (Ctrl+C)
 
-- Backend URL: Update the frontend backend endpoint in `frontend/src/app/auth-page/auth-page.component.ts` if it differs from `http://localhost:8000`.
-- Camera settings: Modify `frontend/src/app/services/camera.service.ts` for `getUserMedia` constraints (resolution, framerate) and capture quality.
-- Model files: Keep `face_landmarker.task` and `hand_landmarker.task` in `humanauth-web/backend` or update `app.py` to point to their location.
+### Option 2: Manual Setup
 
-## 7. Performance \& Optimization
+If you prefer manual setup or need custom configuration:
 
-Frontend optimizations
-- Use `requestAnimationFrame` for render loops.
-- Separate canvases: one for capture and one for visualization to avoid size/mode conflicts.
-- Apply `transform: translate3d(0,0,0)` and `will-change` hints to force GPU compositing when beneficial.
+#### Backend Setup
+```bash
+cd backend
 
-Backend optimizations
-- Batch or downscale incoming frames before inference (maintain enough resolution for landmarks).
-- Reuse model sessions and avoid reloading on each request.
-- Use asynchronous WebSocket handlers and non-blocking image IO.
-- Consider running CPU-bound work in threads/process pool or on a GPU when available.
+# Create virtual environment
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-Quality vs latency tradeoffs
-- Image quality default is `0.7` (balance). Lower to reduce bandwidth and inference time, raise for more accurate detection.
+# Install dependencies
+pip install -r requirements.txt
 
-## 8. Security Considerations
+# Verify model files exist
+ls -la face_landmarker.task hand_landmarker.task
 
-- Do not expose model files or internal endpoints publicly.
-- Run behind HTTPS in production; use secure WebSocket (`wss://`) to protect frame data.
-- Implement authentication/authorization for production use.
-- Rate limit and validate incoming frames to mitigate abuse.
-- Sanitize and minimize stored PII; do not persist raw frames unless necessary and encrypted.
+# Start backend server
+python app.py
+```
 
-## 9. Testing \& CI
+#### Frontend Setup
+```bash
+cd frontend
 
-- Frontend: add unit tests for services/components using Angular TestBed and Karma/Jasmine.
-- Backend: add unit tests for model loader, inference outputs, and WebSocket handlers using pytest and test clients.
-- Add end-to-end tests to simulate camera input and validate full flow (tools like Playwright can mock media devices).
-- CI: include lint and test steps; optionally build artifacts for containerization.
+# Install dependencies
+npm install
 
-## 10. Deployment Suggestions
+# Start development server
+npm start
 
-- Containerize backend with a small base image (Python slim). Mount model files or include them in the image.
-- Serve frontend as static assets behind a CDN or Nginx, and proxy WebSocket traffic to the backend.
-- Use TLS termination and a reverse proxy (Nginx) to handle `wss` and HTTP(S).
-- Scale backend horizontally behind a load balancer; use sticky sessions or session store for WebSocket affinity.
+# Or build for production
+npm run build
+```
 
-## 11. Project Layout
+## Usage Instructions
 
-Current project layout:
+### 1. Starting the System
+```bash
+# Start in development mode (default)
+./start.sh
 
-- `HumanAuth/` \- repository root
-  - `humanauth-web/` \- **Main project directory (use this)**
-    - `start.sh` \- start orchestration script (recommended way to run the project)
-    - `frontend/` \- Angular application
-      - `src/`
-        - `app/`
-          - `auth-page/` \- Main authentication page
-            - `auth-page.component.ts`
-            - `auth-page.component.scss`
-            - `auth-page.component.html`
-          - `architecture/` \- Architecture explanation page
-          - `authentication-explanation/` \- Authentication details page
-          - `home-page/` \- Landing page
-          - `services/`
-            - `camera.service.ts` \- Camera handling
-            - `auth.service.ts` \- Authentication logic
-      - `package.json`
-      - `public/` \- Static assets including HedgeOrange.png favicon
-    - `backend/`
-      - `app.py` \- Main server application
-      - `human_auth.py` \- Authentication engine
-      - `requirements.txt` \- Python dependencies
-      - `face_landmarker.task` \- Face detection model
-      - `hand_landmarker.task` \- Hand detection model
-  - `localdemo/` \- **Ignore this directory** (deprecated)
-  - `LICENSE`
-  - `README.md` \- (this file)
+# The system will display:
+# Backend : http://localhost:8000
+# Frontend: http://localhost:4200
+```
 
-## 12. Contributing
+### 2. Accessing the Application
+1. Open your web browser
+2. Navigate to `http://localhost:4200`
+3. Allow camera permissions when prompted
+4. Click "Start Authentication" to begin
 
-- Follow the repository coding style and add tests for new features.
-- Open issues for bugs or design discussions.
-- Use branches and PRs for changes; include a clear description and testing steps.
+### 3. Authentication Process
+1. **Position yourself** in front of the camera
+2. **Look directly** at the camera for face detection
+3. **Show your hands** in the camera view for hand detection
+4. **Wait for authentication** - the system will display confidence scores
+5. **Authentication complete** when thresholds are met
 
-## 13. License
+## API Documentation
 
-This project is licensed under the MIT License. See `LICENSE` for details.
+### Authentication
+All API endpoints require an API key in the header:
+```
+X-API-Key: your-api-key-here
+```
+
+### Endpoints
+
+#### Health Check
+```http
+GET /api/v1/health
+```
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "timestamp": "2026-03-31T11:07:00.000Z",
+    "models": {
+      "face": true,
+      "hand": true
+    }
+  }
+}
+```
+
+#### Create Authentication Session
+```http
+POST /api/v1/sessions
+```
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "session_id": "session_abc123...",
+    "message": "Authentication session started"
+  }
+}
+```
+
+#### Process Frame
+```http
+POST /api/v1/sessions/{session_id}/process
+Content-Type: application/json
+
+{
+  "frame": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQ..."
+}
+```
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "authenticated": false,
+    "confidence": 0.75,
+    "message": "Face detected, analyzing...",
+    "details": {
+      "face_confidence": 0.85,
+      "hand_confidence": 0.65,
+      "landmarks_detected": true
+    }
+  }
+}
+```
+
+#### Single Image Verification
+```http
+POST /api/v1/verify
+Content-Type: application/json
+
+{
+  "image": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQ..."
+}
+```
+
+#### Reset Session
+```http
+POST /api/v1/sessions/{session_id}/reset
+```
+
+### Rate Limits
+- **Health checks**: 60 requests per minute
+- **Session creation**: 60 requests per minute
+- **Frame processing**: 600 requests per minute (10 FPS)
+- **Verification**: 30 requests per minute
+
+## Testing
+
+The system includes comprehensive testing across multiple categories:
+
+### Running All Tests
+```bash
+# Run the complete test suite
+python tests/run_all_tests.py
+
+# Run specific test categories
+python -m pytest tests/backend/          # Backend tests
+python -m pytest tests/frontend/         # Frontend tests
+python -m pytest tests/integration/      # Integration tests
+python -m pytest tests/security/         # Security tests
+python -m pytest tests/performance/      # Performance tests
+```
+
+### Test Categories
+
+#### Backend Tests
+- **Unit tests**: Core authentication logic
+- **API tests**: REST endpoint functionality
+- **Model tests**: Biometric processing accuracy
+- **Visualization tests**: Landmark rendering
+
+#### Frontend Tests
+- **Component tests**: Angular component functionality
+- **Service tests**: Camera and authentication services
+- **Integration tests**: Frontend-backend communication
+
+#### Security Tests
+- **Vulnerability scanning**: Common security issues
+- **Authentication bypass**: Security mechanism testing
+- **Rate limiting**: DoS protection verification
+
+#### Performance Tests
+- **Load testing**: High-concurrency scenarios
+- **Latency testing**: Response time measurement
+- **Memory usage**: Resource consumption analysis
+
+### Test Results Interpretation
+- **✅ PASS**: Test successful
+- **❌ FAIL**: Test failed - requires attention
+- **⚠️ SKIP**: Test skipped (missing dependencies/conditions)
+
+## Configuration
+
+### Environment Variables
+
+#### Backend Configuration
+```bash
+# Server Configuration
+PORT=8000                    # Server port (default: 8000)
+FLASK_ENV=development        # Environment mode
+SECRET_KEY=your-secret-key   # Flask session secret
+
+# Authentication
+API_KEY=your-api-key         # API authentication key
+
+# CORS Configuration
+ALLOWED_ORIGINS=http://localhost:4200,https://yourdomain.com
+
+# Model Paths (optional - defaults to backend/ directory)
+FACE_MODEL_PATH=/path/to/face_landmarker.task
+HAND_MODEL_PATH=/path/to/hand_landmarker.task
+
+# Logging
+LOG_LEVEL=INFO               # DEBUG, INFO, WARNING, ERROR
+```
+
+#### Frontend Configuration
+Edit `frontend/src/environments/environment.ts`:
+```typescript
+export const environment = {
+  production: false,
+  backendUrl: 'http://localhost:8000'
+};
+```
+
+### Model Files
+The system requires two MediaPipe model files:
+- **face_landmarker.task**: Face landmark detection model (~2.6MB)
+- **hand_landmarker.task**: Hand landmark detection model (~2.3MB)
+
+These files should be placed in the `backend/` directory and are included with the project.
+
+## 🛠️ Development
+
+### Development Mode vs Production Mode
+
+#### Development Mode (Default)
+- **Frontend**: Runs on `http://localhost:4200` with hot reload
+- **Backend**: Runs on `http://localhost:8000` with debug mode
+- **CORS**: Allows all origins for easier testing
+- **Logging**: Verbose logging enabled
+- **API Keys**: Auto-generated development keys
+
+#### Production Mode
+- **Frontend**: Built and served by backend
+- **Backend**: Optimized for production with security hardening
+- **CORS**: Restricted to specified origins only
+- **Logging**: Production-level logging
+- **API Keys**: Must be explicitly configured
+
+### Building for Production
+```bash
+# Build frontend
+cd frontend
+npm run build
+
+# The built files will be in dist/frontend/browser/
+# Backend will automatically serve these files
+```
+
+### Custom Development Setup
+```bash
+# Backend with custom configuration
+cd backend
+export FLASK_ENV=development
+export API_KEY=my-dev-key
+export LOG_LEVEL=DEBUG
+python app.py
+
+# Frontend with custom backend URL
+cd frontend
+# Edit src/environments/environment.ts
+npm start
+```
+
+
+
+## 📊 System Requirements
+
+### Minimum Requirements
+- **CPU**: Dual-core 2.0GHz processor
+- **RAM**: 4GB system memory
+- **Storage**: 1GB free space
+- **Camera**: 720p webcam
+- **Browser**: Chrome, Firefox, Safari, Edge
+
+### Recommended Requirements
+- **CPU**: Quad-core 2.5GHz processor or better
+- **RAM**: 8GB system memory
+- **Storage**: 2GB free space
+- **Camera**: 1080p webcam with good low-light performance
+- **Browser**: Latest version of supported browsers
+
+### Network Requirements
+- **Local development**: No internet required after initial setup
+- **Production deployment**: HTTPS required for camera access
+- **Bandwidth**: Minimal - all processing is local
+
+## Security Considerations
+
+### Data Privacy
+- **No data storage**: Biometric data is processed in real-time and not stored
+- **Local processing**: All biometric analysis happens locally
+- **Session-based**: Authentication state is temporary and session-scoped
+
+### Security Features
+- **API key authentication**: Prevents unauthorized access
+- **Rate limiting**: Protects against DoS attacks
+- **CORS protection**: Restricts cross-origin requests
+- **Input validation**: Sanitizes all user inputs
+- **Session timeout**: Automatic session expiration
+
+### Production Security
+- **Use HTTPS**: Required for camera access and secure communication
+- **Strong API keys**: Generate cryptographically secure API keys
+- **Regular updates**: Keep dependencies updated for security patches
+- **Access logging**: Monitor and log authentication attempts
+
+## Performance Optimization
+
+### Backend Optimization
+- **Model caching**: Models are loaded once and reused
+- **Session pooling**: Efficient session management
+- **Memory management**: Automatic cleanup of expired sessions
+- **Rate limiting**: Prevents resource exhaustion
+
+### Frontend Optimization
+- **Frame rate control**: Configurable processing frequency
+- **Canvas optimization**: Efficient rendering and drawing
+- **Memory management**: Proper cleanup of video streams
+- **Lazy loading**: Components loaded on demand
+
+### System Optimization
+- **Hardware acceleration**: Utilizes GPU when available
+- **Multi-threading**: Parallel processing where possible
+- **Caching strategies**: Efficient resource utilization
+- **Connection pooling**: Optimized network communication
+
+## 📝 License
+
+This project is developed for educational purposes. Please refer to the LICENSE file for detailed licensing information.
 
 ---
 
-If files or paths differ in your copy of the repo, update configuration values in `frontend/src/app/auth-page/auth-page.component.ts` and `humanauth-web/start.sh` accordingly.
+**Author**: Jason Dank | Jack Denholm
+**Last Updated**: March 31, 2026
+
