@@ -474,6 +474,5 @@ This project is developed for educational purposes. Please refer to the LICENSE 
 
 ---
 
-**Author**: Jason Dank | Jack Denholm
-**Last Updated**: March 31, 2026
+**Authors**: Jason Dank | Jack Denholm
 
